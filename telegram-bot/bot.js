@@ -1,5 +1,6 @@
 import { Telegraf, Markup } from "telegraf";
 import dotenv from "dotenv";
+import http from "http";
 import { VOCAB, TIPS } from "./data.js";
 
 dotenv.config();
@@ -349,6 +350,15 @@ bot.catch((err, ctx) => {
   console.error(`⚠️ Bot error for update ${ctx.updateType}:`, err);
 });
 
+// Start a simple HTTP health-check server for cloud hosting services (like Render)
+const PORT = process.env.PORT || 3000;
+http.createServer((req, res) => {
+  res.writeHead(200, { "Content-Type": "text/plain" });
+  res.end("Deutsch Hub Bot is active and running!");
+}).listen(PORT, () => {
+  console.log(`📡 Health-check server listening on port ${PORT}`);
+});
+
 // Launch Bot
 if (TOKEN && TOKEN !== "YOUR_TELEGRAM_BOT_TOKEN_HERE") {
   bot.launch()
@@ -361,3 +371,11 @@ if (TOKEN && TOKEN !== "YOUR_TELEGRAM_BOT_TOKEN_HERE") {
 // Graceful stop
 process.once("SIGINT", () => bot.stop("SIGINT"));
 process.once("SIGTERM", () => bot.stop("SIGTERM"));
+
+// Prevent process crash on uncaught exceptions and promise rejections (e.g. expired Telegram callback queries)
+process.on("unhandledRejection", (reason, promise) => {
+  console.error("⚠️ Unhandled Promise Rejection:", reason);
+});
+process.on("uncaughtException", (error) => {
+  console.error("⚠️ Uncaught Exception:", error);
+});
