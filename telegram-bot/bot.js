@@ -56,16 +56,28 @@ bot.start((ctx) => {
   const username = ctx.from.username ? `@${ctx.from.username}` : "Username yo'q";
   const userId = ctx.from.id;
 
-  // Notify admin about new user start, except if the admin is the one starting
-  if (String(userId) !== String(ADMIN_CHAT_ID) && ADMIN_CHAT_ID) {
-    const adminNotification = 
-      `🔔 *Yangi foydalanuvchi!* (Deutsch Hub Bot)\n\n` +
-      `👤 *Ismi:* ${ctx.from.first_name} ${ctx.from.last_name || ""}\n` +
-      `🏷️ *Username:* ${username}\n` +
-      `🆔 *Telegram ID:* \`${userId}\``;
-    
-    ctx.telegram.sendMessage(ADMIN_CHAT_ID, adminNotification, { parse_mode: "Markdown" })
-      .catch(err => console.error("⚠️ Admin xabar yuborishda xato:", err));
+  console.log(`👤 Start command by: ${name} (ID: ${userId}, Username: ${username})`);
+
+  // Notify admin about new user start
+  if (ADMIN_CHAT_ID) {
+    if (String(userId) !== String(ADMIN_CHAT_ID)) {
+      const adminNotification = 
+        `🔔 *Yangi foydalanuvchi!* (Deutsch Hub Bot)\n\n` +
+        `👤 *Ismi:* ${ctx.from.first_name} ${ctx.from.last_name || ""}\n` +
+        `🏷️ *Username:* ${username}\n` +
+        `🆔 *Telegram ID:* \`${userId}\``;
+      
+      ctx.telegram.sendMessage(ADMIN_CHAT_ID, adminNotification, { parse_mode: "Markdown" })
+        .catch(err => console.error("⚠️ Admin xabar yuborishda xato:", err));
+    } else {
+      // If it is the admin, send a test notification to confirm it works
+      const selfNotification = 
+        `🔔 *Siz (Admin) botni ishga tushirdingiz!*\n\n` +
+        `Xabarnoma tizimi faol va to'g'ri ishlamoqda. Yangi foydalanuvchilar kelganda sizga xabar keladi.`;
+      
+      ctx.telegram.sendMessage(ADMIN_CHAT_ID, selfNotification, { parse_mode: "Markdown" })
+        .catch(err => console.error("⚠️ Admin test xabari yuborishda xato:", err));
+    }
   }
 
   const welcomeText = 
@@ -91,6 +103,11 @@ bot.help((ctx) => {
     `Muammolar yuzaga kelsa, /start orqali menyuni qayta yangilang.`,
     mainKeyboard()
   );
+});
+
+// My ID command
+bot.command("myid", (ctx) => {
+  ctx.replyWithMarkdown(`🆔 Sizning Telegram ID: \`${ctx.from.id}\``);
 });
 
 // Menu Navigation Handlers
