@@ -7,6 +7,7 @@ dotenv.config();
 
 const TOKEN = process.env.BOT_TOKEN;
 const WEB_APP_URL = process.env.WEB_APP_URL || "https://deutsch-blitz.vercel.app/";
+const ADMIN_CHAT_ID = process.env.ADMIN_CHAT_ID || "529303055";
 
 if (!TOKEN || TOKEN === "YOUR_TELEGRAM_BOT_TOKEN_HERE") {
   console.log("⚠️ Eslatma: Telegram Bot tokeni kiritilmagan. Iltimos, .env faylini tahrirlang!");
@@ -52,6 +53,21 @@ const mainKeyboard = () => {
 // Start Command
 bot.start((ctx) => {
   const name = ctx.from.first_name || "Do'stim";
+  const username = ctx.from.username ? `@${ctx.from.username}` : "Username yo'q";
+  const userId = ctx.from.id;
+
+  // Notify admin about new user start, except if the admin is the one starting
+  if (String(userId) !== String(ADMIN_CHAT_ID) && ADMIN_CHAT_ID) {
+    const adminNotification = 
+      `🔔 *Yangi foydalanuvchi!* (Deutsch Hub Bot)\n\n` +
+      `👤 *Ismi:* ${ctx.from.first_name} ${ctx.from.last_name || ""}\n` +
+      `🏷️ *Username:* ${username}\n` +
+      `🆔 *Telegram ID:* \`${userId}\``;
+    
+    ctx.telegram.sendMessage(ADMIN_CHAT_ID, adminNotification, { parse_mode: "Markdown" })
+      .catch(err => console.error("⚠️ Admin xabar yuborishda xato:", err));
+  }
+
   const welcomeText = 
     `🇩🇪 *Herzlich willkommen, ${name}!* 🇺🇿\n\n` +
     `*Deutsch Hub* til o'rganish botiga xush kelibsiz!\n\n` +
