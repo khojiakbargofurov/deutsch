@@ -1,5 +1,55 @@
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap');
 
+:root {
+  /* DARK THEME (DEFAULT) */
+  --bg: #0d0d0d;
+  --nav-bg: rgba(13, 13, 13, 0.96);
+  --color: #f0ece0;
+  --card-bg: #0f0f0f;
+  --card-border: #1c1c1c;
+  --border-color: #1c1c1c;
+  --hover-bg: #131313;
+  --text-muted: #999;
+  --text-light: #aaa;
+  --chip-bg: none;
+  --chip-border: #222;
+  --chip-text: #888;
+  --search-bg: #141414;
+  --search-border: #222;
+  --qopt-bg: #141414;
+  --qopt-border: #252525;
+  --qopt-hover: #1a1a14;
+  --opt-letter-bg: #1f1f1f;
+  --opt-letter-color: #555;
+  --scrollbar-track: #111;
+  --scrollbar-thumb: #2a2a2a;
+}
+
+body.light-theme {
+  /* LIGHT THEME */
+  --bg: #f7f5f0;
+  --nav-bg: rgba(247, 245, 240, 0.96);
+  --color: #1c1b18;
+  --card-bg: #ffffff;
+  --card-border: #e4e1d9;
+  --border-color: #e4e1d9;
+  --hover-bg: #f0ede6;
+  --text-muted: #66655f;
+  --text-light: #555;
+  --chip-bg: rgba(0,0,0,0.03);
+  --chip-border: #e0dcd3;
+  --chip-text: #77756f;
+  --search-bg: #ffffff;
+  --search-border: #e0dcd3;
+  --qopt-bg: #ffffff;
+  --qopt-border: #e4e1d9;
+  --qopt-hover: #fbfaf7;
+  --opt-letter-bg: #f0ede6;
+  --opt-letter-color: #8c8a82;
+  --scrollbar-track: #f7f5f0;
+  --scrollbar-thumb: #d1cdc2;
+}
+
 /* ── RESET ── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -8,12 +58,13 @@ html { font-size: 16px; }
 body {
   margin: 0;
   padding: 0;
-  background: #0d0d0d;
-  color: #f0ece0;
+  background: var(--bg);
+  color: var(--color);
   font-family: 'DM Sans', sans-serif;
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  transition: background 0.3s ease, color 0.3s ease;
 }
 
 /* Reset ALL button defaults so our classes work */
@@ -30,8 +81,8 @@ button {
 
 /* ── SCROLLBAR ── */
 ::-webkit-scrollbar { width: 4px; }
-::-webkit-scrollbar-track { background: #111; }
-::-webkit-scrollbar-thumb { background: #2a2a2a; border-radius: 4px; }
+::-webkit-scrollbar-track { background: var(--scrollbar-track); }
+::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 4px; }
 
 /* ── UTILITIES ── */
 .nb {
@@ -43,7 +94,7 @@ button {
 
 /* ── NAV LINKS ── */
 .nl {
-  color: #777;
+  color: var(--text-light);
   font-size: 13px;
   letter-spacing: .8px;
   text-transform: uppercase;
@@ -58,11 +109,32 @@ button {
   background: rgba(244,208,63,.07);
 }
 
+/* ── THEME TOGGLE BUTTON ── */
+.theme-toggle-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  font-size: 18px;
+  color: var(--color);
+  background: var(--chip-bg);
+  border: 1px solid var(--border-color);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.theme-toggle-btn:hover {
+  background: var(--hover-bg);
+  border-color: #f4d03f;
+  transform: scale(1.05);
+}
+
 /* ── MOBILE MENU ── */
 .mob-menu {
   position: fixed;
   inset: 56px 0 0 0;
-  background: rgba(10,10,10,.97);
+  background: var(--nav-bg);
   z-index: 99;
   display: flex;
   flex-direction: column;
@@ -70,9 +142,10 @@ button {
   padding: 20px 16px;
   backdrop-filter: blur(12px);
   overflow-y: auto;
+  transition: background 0.3s ease;
 }
 .mob-nl {
-  color: #aaa;
+  color: var(--text-light);
   font-size: 16px;
   letter-spacing: 1px;
   text-transform: uppercase;
@@ -110,8 +183,8 @@ button {
 
 .btn-o {
   background: none;
-  border: 1.5px solid #2a2a2a;
-  color: #ccc;
+  border: 1.5px solid var(--border-color);
+  color: var(--color);
   border-radius: 10px;
   padding: 10px 20px;
   font-family: 'DM Sans', sans-serif;
@@ -124,11 +197,11 @@ button {
 
 /* ── QUIZ OPTIONS ── */
 .qopt {
-  background: #141414;
-  border: 1.5px solid #252525;
+  background: var(--qopt-bg);
+  border: 1.5px solid var(--qopt-border);
   border-radius: 14px;
   padding: 14px 18px;
-  color: #f0ece0;
+  color: var(--color);
   font-family: 'DM Sans', sans-serif;
   font-size: 15px;
   cursor: pointer;
@@ -140,7 +213,7 @@ button {
   align-items: center;
   gap: 12px;
 }
-.qopt:hover:not(:disabled) { border-color: #f4d03f; background: #1a1a14; }
+.qopt:hover:not(:disabled) { border-color: #f4d03f; background: var(--qopt-hover); }
 .qopt.correct { border-color: #2ecc71 !important; background: rgba(46,204,113,.1) !important; }
 .qopt.wrong   { border-color: #e63946 !important; background: rgba(230,57,70,.1)  !important; }
 .qopt:disabled { cursor: default; }
@@ -149,13 +222,13 @@ button {
   width: 28px;
   height: 28px;
   border-radius: 8px;
-  background: #1f1f1f;
+  background: var(--opt-letter-bg);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 12px;
   font-weight: 600;
-  color: #555;
+  color: var(--opt-letter-color);
   flex-shrink: 0;
 }
 .qopt.correct .opt-letter { background: rgba(46,204,113,.2); color: #2ecc71; }
@@ -167,37 +240,37 @@ button {
   border-radius: 20px;
   font-size: 13px;
   cursor: pointer;
-  border: 1.5px solid #222;
-  background: none;
-  color: #888;
+  border: 1.5px solid var(--chip-border);
+  background: var(--chip-bg);
+  color: var(--chip-text);
   font-family: 'DM Sans', sans-serif;
   transition: all .2s;
   white-space: nowrap;
 }
-.chip:hover:not(.chip-act) { border-color: #333; color: #ccc; }
+.chip:hover:not(.chip-act) { border-color: var(--border-color); color: var(--color); }
 
 /* ── CARDS ── */
 .tip-card {
-  border: 1px solid #1e1e1e;
+  border: 1px solid var(--card-border);
   border-radius: 18px;
-  background: #0f0f0f;
+  background: var(--card-bg);
   margin-bottom: 12px;
   overflow: hidden;
   cursor: pointer;
-  transition: border-color .2s;
+  transition: border-color .2s, background-color .3s;
 }
-.tip-card:hover { border-color: #2a2a2a; }
+.tip-card:hover { border-color: var(--border-color); }
 
 .home-tile {
-  border: 1px solid #1c1c1c;
+  border: 1px solid var(--card-border);
   border-radius: 20px;
   padding: 28px 20px;
-  background: #0f0f0f;
+  background: var(--card-bg);
   cursor: pointer;
   transition: all .22s;
   text-align: center;
 }
-.home-tile:hover { border-color: #f4d03f; transform: translateY(-3px); background: #131310; }
+.home-tile:hover { border-color: #f4d03f; transform: translateY(-3px); background: var(--qopt-hover); }
 
 /* ── VOCAB ROW ── */
 .vrow {
@@ -205,11 +278,11 @@ button {
   justify-content: space-between;
   align-items: center;
   padding: 13px 18px;
-  border-bottom: 1px solid #161616;
+  border-bottom: 1px solid var(--border-color);
   transition: background .12s;
 }
 .vrow:last-child { border-bottom: none; }
-.vrow:hover { background: #131313; }
+.vrow:hover { background: var(--hover-bg); }
 
 /* ── FLASHCARD ── */
 .flash-wrap { perspective: 1000px; width: 100%; min-height: 210px; cursor: pointer; }
@@ -233,29 +306,31 @@ button {
   padding: 30px;
   text-align: center;
 }
-.flash-front { background: #111; border: 2px solid #1e1e1e; }
-.flash-back  { background: #0f1a12; border: 2px solid #2ecc71; transform: rotateY(180deg); }
+.flash-front { background: var(--card-bg); border: 2px solid var(--card-border); }
+.flash-back  { background: var(--bg); border: 2px solid #2ecc71; transform: rotateY(180deg); color: var(--color); }
+
+body.light-theme .flash-back { background: #eef9f2; }
 
 /* ── SEARCH ── */
 .search-inp {
-  background: #141414;
-  border: 1.5px solid #222;
+  background: var(--search-bg);
+  border: 1.5px solid var(--search-border);
   border-radius: 12px;
   padding: 11px 16px;
-  color: #f0ece0;
+  color: var(--color);
   font-family: 'DM Sans', sans-serif;
   font-size: 14px;
   width: 100%;
   outline: none;
-  transition: border-color .2s;
+  transition: border-color .2s, background-color .3s;
 }
 .search-inp:focus { border-color: #f4d03f; }
-.search-inp::placeholder { color: #444; }
+.search-inp::placeholder { color: #888; }
 
 /* ── PROGRESS BAR ── */
 .prog-bar {
   height: 4px;
-  background: #1a1a1a;
+  background: var(--border-color);
   border-radius: 4px;
   overflow: hidden;
   margin-bottom: 28px;
@@ -306,26 +381,26 @@ button {
   border-radius: 8px;
   transition: background .2s;
 }
-.ham:hover { background: #1a1a1a; }
+.ham:hover { background: var(--hover-bg); }
 .ham span {
   width: 20px;
   height: 2px;
-  background: #ccc;
+  background: var(--color);
   border-radius: 2px;
   transition: all .3s;
   display: block;
 }
 
 /* ── NAV SHOW/HIDE ── */
-.desktop-nav { display: flex; gap: 2px; }
+.desktop-nav { display: flex; gap: 2px; align-items: center; }
 .mobile-menu-btn { display: none; }
 
 /* ── TIP DETAIL ── */
 .tip-detail {
   font-size: 14px;
-  color: #999;
+  color: var(--text-muted);
   line-height: 1.85;
-  border-top: 1px solid #161616;
+  border-top: 1px solid var(--border-color);
   padding: 14px 20px 20px 74px;
 }
 
@@ -348,7 +423,7 @@ button {
 
 /* ─────────────────────────────────────────
    RESPONSIVE BREAKPOINTS
-───────────────────────────────────────── */
+   ───────────────────────────────────────── */
 
 /* Tablet (≤768px) */
 @media (max-width: 768px) {

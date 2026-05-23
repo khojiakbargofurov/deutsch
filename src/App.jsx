@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 
 /* ─────────────── DATA ─────────────── */
 const TIPS = [
@@ -148,10 +148,10 @@ const VOCAB = {
 };
 
 const CAT_META = {
-  Verben: { label: "Fe'llar", accent: "#e63946", bg: "#1c1010" },
-  Nomen: { label: "Otlar", accent: "#f4d03f", bg: "#1c1a10" },
-  Adjektive: { label: "Sifatlar", accent: "#2ecc71", bg: "#101c13" },
-  Adverbien: { label: "Ravishlar", accent: "#3498db", bg: "#10131c" },
+  Verben: { label: "Fe'llar", accent: "#e63946", bg: "rgba(230, 57, 70, 0.08)" },
+  Nomen: { label: "Otlar", accent: "#f4d03f", bg: "rgba(244, 208, 63, 0.08)" },
+  Adjektive: { label: "Sifatlar", accent: "#2ecc71", bg: "rgba(46, 204, 113, 0.08)" },
+  Adverbien: { label: "Ravishlar", accent: "#3498db", bg: "rgba(52, 152, 219, 0.08)" },
 };
 
 /* ─────────────── HELPERS ─────────────── */
@@ -185,12 +185,12 @@ function buildQuiz(category) {
 /* ─────────────── STYLES ─────────────── */
 const S = {
   page: {
-    background: "#0d0d0d", minHeight: "100vh", color: "#f0ece0",
+    background: "var(--bg)", minHeight: "100vh", color: "var(--color)",
     fontFamily: "'DM Sans', sans-serif"
   },
   nav: {
-    position: "sticky", top: 0, zIndex: 100, background: "rgba(13,13,13,0.96)",
-    backdropFilter: "blur(10px)", borderBottom: "1px solid #1c1c1c",
+    position: "sticky", top: 0, zIndex: 100, background: "var(--nav-bg)",
+    backdropFilter: "blur(10px)", borderBottom: "1px solid var(--border-color)",
     padding: "0 16px", display: "flex", alignItems: "center",
     justifyContent: "space-between", height: 56
   },
@@ -201,7 +201,7 @@ const S = {
   },
   navTitle: {
     fontFamily: "'Playfair Display',serif", fontWeight: 700,
-    fontSize: 17, color: "#f0ece0", whiteSpace: "nowrap"
+    fontSize: 17, color: "var(--color)", whiteSpace: "nowrap"
   },
   inner: { maxWidth: 720, margin: "0 auto", padding: "40px 16px 80px" },
 };
@@ -220,6 +220,26 @@ const NAV_ITEMS = [
 export default function App() {
   const [page, setPage] = useState("home");
   const [menuOpen, setMenuOpen] = useState(false);
+
+  // Theme state
+  const [theme, setTheme] = useState(() => {
+    const saved = localStorage.getItem("theme");
+    if (saved) return saved;
+    return window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+  });
+
+  useEffect(() => {
+    document.body.classList.remove("dark-theme", "light-theme");
+    document.body.classList.add(`${theme}-theme`);
+  }, [theme]);
+
+  const toggleTheme = useCallback(() => {
+    setTheme(t => {
+      const next = t === "dark" ? "light" : "dark";
+      localStorage.setItem("theme", next);
+      return next;
+    });
+  }, []);
 
   // quiz state
   const [quizCat, setQuizCat] = useState("all");
@@ -284,14 +304,24 @@ export default function App() {
             <button key={n.id} className={`nb nl ${page === n.id || (n.id === "quizSetup" && page === "quiz") ? "act" : ""}`}
               onClick={() => navigate(n.id)}>{n.label}</button>
           ))}
+          <button className="theme-toggle-btn" onClick={toggleTheme} title="Mavzuni o'zgartirish">
+            {theme === "dark" ? "☀️" : "🌙"}
+          </button>
         </div>
 
-        {/* Mobile hamburger */}
-        <button className="nb mobile-menu-btn ham" onClick={() => setMenuOpen(m => !m)}>
-          <span style={menuOpen ? { transform: "rotate(45deg) translate(5px,5px)" } : {}} />
-          <span style={menuOpen ? { opacity: 0 } : {}} />
-          <span style={menuOpen ? { transform: "rotate(-45deg) translate(5px,-5px)" } : {}} />
-        </button>
+        {/* Mobile menu utilities */}
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <button className="theme-toggle-btn mobile-toggle" onClick={toggleTheme} title="Mavzuni o'zgartirish">
+            {theme === "dark" ? "☀️" : "🌙"}
+          </button>
+
+          {/* Mobile hamburger */}
+          <button className="nb mobile-menu-btn ham" onClick={() => setMenuOpen(m => !m)}>
+            <span style={menuOpen ? { transform: "rotate(45deg) translate(5px,5px)" } : {}} />
+            <span style={menuOpen ? { opacity: 0 } : {}} />
+            <span style={menuOpen ? { transform: "rotate(-45deg) translate(5px,-5px)" } : {}} />
+          </button>
+        </div>
       </nav>
 
       {/* Mobile dropdown menu */}
@@ -310,7 +340,7 @@ export default function App() {
         <div style={{ ...S.inner }} className="inner-pad">
           <div style={{ textAlign: "center", marginBottom: 52 }}>
             <div style={{
-              display: "inline-block", background: "#141414", border: "1px solid #222",
+              display: "inline-block", background: "var(--card-bg)", border: "1px solid var(--border-color)",
               borderRadius: 30, padding: "5px 16px", marginBottom: 22
             }}>
               <span style={{ fontSize: 11, color: "#f4d03f", letterSpacing: 2, textTransform: "uppercase" }}>
@@ -323,7 +353,7 @@ export default function App() {
             }}>
               Fließend<br /><span style={{ color: "#f4d03f" }}>Deutsch</span> sprechen
             </h1>
-            <p style={{ fontSize: 15, color: "#777", lineHeight: 1.7, maxWidth: 440, margin: "0 auto" }}>
+            <p style={{ fontSize: 15, color: "var(--text-light)", lineHeight: 1.7, maxWidth: 440, margin: "0 auto" }}>
               {allCount}+ so'z, 5 ta muhim maslahat va takrorlashsiz interaktiv quiz — o'zbek tilida nemis tilini o'rgan!
             </p>
           </div>
@@ -337,19 +367,19 @@ export default function App() {
               <div key={item.go} className="home-tile" onClick={() => navigate(item.go)}>
                 <div style={{ fontSize: 36, marginBottom: 14 }}>{item.emoji}</div>
                 <div style={{ fontFamily: "'Playfair Display',serif", fontSize: 19, fontWeight: 700, marginBottom: 6 }}>{item.title}</div>
-                <div style={{ fontSize: 12, color: "#555" }}>{item.sub}</div>
+                <div style={{ fontSize: 12, color: "var(--text-muted)" }}>{item.sub}</div>
               </div>
             ))}
           </div>
 
-          <div style={{ background: "#0f0f0f", border: "1px solid #1c1c1c", borderRadius: 18, padding: "24px 20px" }}>
+          <div style={{ background: "var(--card-bg)", border: "1px solid var(--border-color)", borderRadius: 18, padding: "24px 20px" }}>
             <div style={{ fontSize: 11, color: "#f4d03f", letterSpacing: 2, textTransform: "uppercase", marginBottom: 18 }}>Qisqa xulosa</div>
             {TIPS.map((t, i) => (
               <div key={i} style={{ display: "flex", gap: 14, marginBottom: 14, alignItems: "flex-start" }}>
-                <span style={{ fontFamily: "'Playfair Display',serif", fontSize: 20, fontWeight: 900, color: "#1e1e1e", minWidth: 30 }}>{t.number}</span>
+                <span style={{ fontFamily: "'Playfair Display',serif", fontSize: 20, fontWeight: 900, color: "var(--border-color)", minWidth: 30 }}>{t.number}</span>
                 <div>
                   <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 2 }}>{t.icon} {t.title}</div>
-                  <div style={{ fontSize: 13, color: "#555" }}>{t.short}</div>
+                  <div style={{ fontSize: 13, color: "var(--text-muted)" }}>{t.short}</div>
                 </div>
               </div>
             ))}
