@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import http from "http";
 import path from "path";
 import { fileURLToPath } from "url";
+import fs from "fs";
 import { VOCAB, TIPS, DAILY_WORDS } from "./data.js";
 import { addUser, getUsers, updateHighScore, getLeaderboard } from "./usersStore.js";
 
@@ -59,7 +60,8 @@ function buildBotQuiz() {
 const mainKeyboard = () => {
   return Markup.inlineKeyboard([
     [Markup.button.callback("📚 Lug'at Bo'limi", "menu_vocab"), Markup.button.callback("🧠 Test Boshlash", "menu_quiz")],
-    [Markup.button.callback("🏆 Top O'quvchilar", "menu_leaderboard"), Markup.button.callback("📖 Muhim Maslahatlar", "menu_tips")],
+    [Markup.button.callback("🎴 Fleshkartalar", "menu_flashcard_setup"), Markup.button.callback("🏆 Top O'quvchilar", "menu_leaderboard")],
+    [Markup.button.callback("📖 Muhim Maslahatlar", "menu_tips")],
     [Markup.button.webApp("🌐 Deutsch Hub Saytini Ochish", WEB_APP_URL)]
   ]);
 };
@@ -285,6 +287,20 @@ bot.action("menu_leaderboard", (ctx) => {
   });
 });
 
+// TTS ( Ovozli talaffuz ) callback
+bot.action(/^tts_(.+)$/, (ctx) => {
+  const word = ctx.match[1];
+  ctx.answerCbQuery(`"${word}" talaffuzi...`);
+  
+  const ttsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(word)}&tl=de&client=tw-ob`;
+  
+  ctx.replyWithVoice({ url: ttsUrl })
+    .catch(err => {
+      console.error("❌ TTS yuborishda xato:", err.message);
+      ctx.reply("❌ Ovozli talaffuzni yuklashda muammo yuz berdi. Iltimos, keyinroq urinib ko'ring.");
+    });
+});
+
 // TIPS section
 bot.action("menu_tips", (ctx) => {
   ctx.answerCbQuery();
@@ -505,6 +521,184 @@ bot.action("quiz_stop", (ctx) => {
   });
 });
 
+// ── FLASHCARDS GAME MODULE ──
+
+// Setup Menu
+bot.action("menu_flashcard_setup", (ctx) => {
+  ctx.answerCbQuery();
+  const flashButtons = [
+    [Markup.button.callback("🔴 Fe'llar (Verben)", "flash_start_Verben"), Markup.button.callback("🟡 Otlar (Nomen)", "flash_start_Nomen")],
+    [Markup.button.callback("🟢 Sifatlar (Adjektive)", "flash_start_Adjektive"), Markup.button.callback("🔵 Ravishlar (Adverbien)", "flash_start_Adverbien")],
+    [Markup.button.callback("🌟 Barcha so'zlar", "flash_start_all")],
+    [Markup.button.callback("⬅️ Bosh menyuga qaytish", "menu_main")]
+  ];
+
+  ctx.editMessageText(
+    `*🎴 Fleshkartalar yordamida so'z yodlash o'yini*\n\n` +
+    `Qaysi toifadagi so'zlarni yodlashni xohlaysiz? Ro'yxatdan toifani tanlang:`,
+    { parse_mode: "Markdown", ...Markup.inlineKeyboard(flashButtons) }
+  );
+});
+
+// Helper: Build Flashcards (20 random unique cards)
+function buildFlashcards(category) {
+  const pool = category === "all"
+    ? Object.entries(VOCAB).flatMap(([cat, ws]) => ws.map(w => ({ ...w, cat })))
+    : VOCAB[category].map(w => ({ ...w, cat: category }));
+
+  const shuffled = shuffle(pool);
+  return shuffled.slice(0, Math.min(20, shuffled.length));
+}
+
+// Start Game action
+bot.action(/^flash_start_(.+)$/, (ctx) => {
+  ctx.answerCbQuery();
+  const cat = ctx.match[1];
+  const cards = buildFlashcards(cat);
+
+  if (cards.length === 0) {
+    return ctx.reply("❌ So'zlar topilmadi.");
+  }
+
+  const chatId = ctx.chat.id;
+  sessions.set(chatId, {
+    type: "flashcards",
+    cards,
+    fIdx: 0,
+    flipped: false,
+    knowCount: 0,
+    dontKnowCount: 0
+  });
+
+  renderFlashcard(ctx, chatId);
+});
+
+// Render Flashcard Helper
+function renderFlashcard(ctx, chatId) {
+  const session = sessions.get(chatId);
+  if (!session) return ctx.reply("Sessiya topilmadi. Bosh menyuga qayting.", mainKeyboard());
+
+  const { cards, fIdx, flipped } = session;
+  const current = cards[fIdx];
+  const total = cards.length;
+
+  const categoryLabels = {
+    Verben: "🔴 Fe'llar",
+    Nomen: "🟡 Otlar",
+    Adjektive: "🟢 Sifatlar",
+    Adverbien: "🔵 Ravishlar"
+  };
+
+  let text = "";
+  let buttons = [];
+
+  if (!flipped) {
+    text = 
+      `🎴 *FLASHKARTA* (Karta ${fIdx + 1}/${total})\n\n` +
+      `Quyidagi so'zning tarjimasini eslashga harakat qiling:\n\n` +
+      `👉 *${current.de}*\n\n` +
+      `_Turkumi: ${categoryLabels[current.cat]}_`;
+
+    buttons = [
+      [Markup.button.callback("👁 Tarjimasini ko'rish", "flash_flip")],
+      [Markup.button.callback(`🔉 Talaffuzi`, `tts_${current.de}`)],
+      [Markup.button.callback("⏹ O'yinni to'xtatish", "flash_stop")]
+    ];
+  } else {
+    text = 
+      `🎴 *FLASHKARTA* (Karta ${fIdx + 1}/${total}) - Tarjimasi\n\n` +
+      `Nemischa: *${current.de}*\n` +
+      `O'zbekcha: *${current.uz}*\n\n` +
+      `_Ushbu so'zni eslay oldingizmi?_`;
+
+    buttons = [
+      [Markup.button.callback("✅ Bildim", "flash_action_correct"), Markup.button.callback("❌ Bilmadim", "flash_action_wrong")],
+      [Markup.button.callback(`🔉 Talaffuzi`, `tts_${current.de}`)],
+      [Markup.button.callback("⏹ O'yinni to'xtatish", "flash_stop")]
+    ];
+  }
+
+  const replyMarkup = Markup.inlineKeyboard(buttons);
+
+  if (ctx.updateType === "callback_query") {
+    ctx.editMessageText(text, { parse_mode: "Markdown", ...replyMarkup });
+  } else {
+    ctx.replyWithMarkdown(text, replyMarkup);
+  }
+}
+
+// Flip Flashcard action
+bot.action("flash_flip", (ctx) => {
+  ctx.answerCbQuery();
+  const chatId = ctx.chat.id;
+  const session = sessions.get(chatId);
+  if (!session) return;
+
+  session.flipped = true;
+  renderFlashcard(ctx, chatId);
+});
+
+// Handle "Bildim" / "Bilmadim" clicks
+bot.action(/^flash_action_(correct|wrong)$/, (ctx) => {
+  const isCorrect = ctx.match[1] === "correct";
+  ctx.answerCbQuery(isCorrect ? "Barakalla! 🎉" : "Yana takrorlang 📚");
+  
+  const chatId = ctx.chat.id;
+  const session = sessions.get(chatId);
+  if (!session) return;
+
+  if (isCorrect) session.knowCount += 1;
+  else session.dontKnowCount += 1;
+
+  session.fIdx += 1;
+  session.flipped = false;
+
+  if (session.fIdx >= session.cards.length) {
+    // Finished Game
+    const total = session.cards.length;
+    const know = session.knowCount;
+    const dont = session.dontKnowCount;
+    
+    let evalText = "";
+    if (know >= 18) evalText = "🏆 Ajoyib natija! So'z boyligingiz ajoyib darajada!";
+    else if (know >= 14) evalText = "🌟 Judayam yaxshi! Ko'pchilik so'zni eslay oldingiz!";
+    else if (know >= 8) evalText = "👍 Qoniqarli, so'zlarni muntazam takrorlab boring!";
+    else evalText = "📚 Ko'proq mashq qilishingiz kerak. Yana urinib ko'ring!";
+
+    const finalReportText = 
+      `🏁 *Fleshkartalar yodlash yakunlandi!*\n\n` +
+      `📊 *Natijangiz:*\n` +
+      `• Jami so'zlar: *${total} ta*\n` +
+      `• Eslay olganingiz: *${know} ta* ✅\n` +
+      `• Eslay olmaganingiz: *${dont} ta* ❌\n\n` +
+      `📝 *Baholash:* _${evalText}_\n\n` +
+      `Yana mashq qilasizmi? Bosh menyuga qayting yoki yangi fleshkartalarni boshlang:`;
+
+    sessions.delete(chatId);
+
+    ctx.editMessageText(finalReportText, {
+      parse_mode: "Markdown",
+      ...Markup.inlineKeyboard([
+        [Markup.button.callback("🎴 Yangi fleshkartalar boshlash", "menu_flashcard_setup")],
+        [Markup.button.callback("🏠 Bosh menyu", "menu_main")]
+      ])
+    });
+  } else {
+    renderFlashcard(ctx, chatId);
+  }
+});
+
+// Stop Flashcards callback
+bot.action("flash_stop", (ctx) => {
+  ctx.answerCbQuery();
+  const chatId = ctx.chat.id;
+  sessions.delete(chatId);
+  ctx.editMessageText("Fleshkartalar to'xtatildi.", {
+    parse_mode: "Markdown",
+    ...mainKeyboard()
+  });
+});
+
 // Handle text messages as real-time search queries or admin broadcast messages
 bot.on("text", async (ctx) => {
   const userId = ctx.from.id;
@@ -562,7 +756,7 @@ bot.on("text", async (ctx) => {
     });
   }
 
-  const query = text.trim().toLowerCase();
+  const query = msgText.trim().toLowerCase();
   
   // Skip command prefix
   if (query.startsWith("/")) return;
@@ -607,9 +801,16 @@ bot.on("text", async (ctx) => {
     text += `\n...va yana *${matches.length - 8} ta* o'xshash so'zlar bor. Barcha so'zlarni saytimizda topasiz.`;
   }
 
-  ctx.replyWithMarkdown(text, Markup.inlineKeyboard([
+  const buttons = [
     [Markup.button.callback("🏠 Bosh menyu", "menu_main"), Markup.button.webApp("🌐 To'liq Lug'at sayti", WEB_APP_URL)]
-  ]));
+  ];
+
+  // If there are matches, offer a quick TTS button for the first (best) match
+  if (topMatches.length > 0) {
+    buttons.unshift([Markup.button.callback(`🔉 "${topMatches[0].de}" talaffuzini eshitish`, `tts_${topMatches[0].de}`)]);
+  }
+
+  ctx.replyWithMarkdown(text, Markup.inlineKeyboard(buttons));
 });
 
 // ── DAILY WORD BROADCAST HELPER & SCHEDULER ──
