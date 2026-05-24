@@ -925,20 +925,20 @@ bot.on("inline_query", (ctx) => {
     const title = `${w.de} — ${w.uz}`;
     const description = `Turkumi: ${categoryLabels[w.cat]}`;
     const messageText = 
-      `🇩🇪 *Nemischa:* \`${w.de}\`\n` +
-      `🇺🇿 *O'zbekcha:* *${w.uz}*\n\n` +
-      `📁 *Turkumi:* _${categoryLabels[w.cat]}_\n` +
-      `🌐 [Deutsch Hub Saytiga O'tish](${WEB_APP_URL})`;
+      `🇩🇪 <b>Nemischa:</b> <code>${w.de}</code>\n` +
+      `🇺🇿 <b>O'zbekcha:</b> <b>${w.uz}</b>\n\n` +
+      `📁 <b>Turkumi:</b> <i>${categoryLabels[w.cat]}</i>\n` +
+      `🌐 <a href="${WEB_APP_URL}">Deutsch Hub Saytiga O'tish</a>`;
 
     return {
       type: "article",
-      id: `inline_${w.de}_${idx}`,
+      id: `inline_${w.cat}_${idx}`,
       title: title,
       description: description,
       thumb_url: "https://upload.wikimedia.org/wikipedia/commons/thumb/b/ba/Flag_of_Germany.svg/200px-Flag_of_Germany.svg.png",
       input_message_content: {
         message_text: messageText,
-        parse_mode: "Markdown",
+        parse_mode: "HTML",
         disable_web_page_preview: true
       },
       reply_markup: {
