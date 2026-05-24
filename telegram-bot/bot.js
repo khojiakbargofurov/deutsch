@@ -935,7 +935,6 @@ bot.on("inline_query", (ctx) => {
       id: `inline_${w.cat}_${idx}`,
       title: title,
       description: description,
-      thumb_url: "https://upload.wikimedia.org/wikipedia/commons/thumb/b/ba/Flag_of_Germany.svg/200px-Flag_of_Germany.svg.png",
       input_message_content: {
         message_text: messageText,
         parse_mode: "HTML",
@@ -943,7 +942,7 @@ bot.on("inline_query", (ctx) => {
       },
       reply_markup: {
         inline_keyboard: [
-          [{ text: "🌐 Veb-saytni ochish", web_app: { url: WEB_APP_URL } }]
+          [{ text: "🌐 Veb-saytni ochish", url: WEB_APP_URL }]
         ]
       }
     };
