@@ -2,6 +2,7 @@ import { Telegraf, Markup } from "telegraf";
 import dotenv from "dotenv";
 import http from "http";
 import { VOCAB, TIPS } from "./data.js";
+import { addUser, getUsers } from "./usersStore.js";
 
 dotenv.config();
 
@@ -15,8 +16,19 @@ if (!TOKEN || TOKEN === "YOUR_TELEGRAM_BOT_TOKEN_HERE") {
 
 const bot = new Telegraf(TOKEN || "MOCK_TOKEN");
 
+// Register users on every update dynamically
+bot.use((ctx, next) => {
+  if (ctx.from) {
+    addUser(ctx.from);
+  }
+  return next();
+});
+
 // User quiz sessions memory
 const sessions = new Map();
+
+// Admin action states memory
+const adminStates = new Map();
 
 // Helper: Shuffle array
 function shuffle(arr) {
@@ -108,6 +120,105 @@ bot.help((ctx) => {
 // My ID command
 bot.command("myid", (ctx) => {
   ctx.replyWithMarkdown(`🆔 Sizning Telegram ID: \`${ctx.from.id}\``);
+});
+
+// ── ADMIN PANEL ──
+
+const adminKeyboard = () => {
+  return Markup.inlineKeyboard([
+    [Markup.button.callback("📊 Statistika", "admin_stats"), Markup.button.callback("👥 Foydalanuvchilar", "admin_users")],
+    [Markup.button.callback("📢 Xabar yuborish", "admin_broadcast_prompt")],
+    [Markup.button.callback("🏠 Bosh menyu", "menu_main")]
+  ]);
+};
+
+// Admin command `/admin`
+bot.command("admin", (ctx) => {
+  const userId = ctx.from.id;
+  if (String(userId) !== String(ADMIN_CHAT_ID)) {
+    return ctx.reply("❌ Bu komandadan faqat bot admini foydalanishi mumkin.");
+  }
+  
+  ctx.replyWithMarkdown(
+    `⚙️ *Deutsch Hub — Admin Paneli*\n\nBoshqaruv bo'limini tanlang:`,
+    adminKeyboard()
+  );
+});
+
+// Admin stats
+bot.action("admin_stats", (ctx) => {
+  const userId = ctx.from.id;
+  if (String(userId) !== String(ADMIN_CHAT_ID)) return ctx.answerCbQuery("Taqqiqlangan!");
+  
+  ctx.answerCbQuery();
+  const users = getUsers();
+  
+  ctx.editMessageText(
+    `📊 *Bot statistikasi:*\n\n` +
+    `• Jami foydalanuvchilar soni: *${users.length} ta*\n\n` +
+    `_Eslatma: Quyidagi ro'yxat faqat botda /start yoki boshqa buyruqlarni bosganlardan shakllanadi._`,
+    { parse_mode: "Markdown", ...adminKeyboard() }
+  );
+});
+
+// Admin users list
+bot.action("admin_users", (ctx) => {
+  const userId = ctx.from.id;
+  if (String(userId) !== String(ADMIN_CHAT_ID)) return ctx.answerCbQuery("Taqqiqlangan!");
+  
+  ctx.answerCbQuery();
+  const users = getUsers();
+  
+  if (users.length === 0) {
+    return ctx.editMessageText("👥 Foydalanuvchilar hali mavjud emas.", {
+      parse_mode: "Markdown", ...adminKeyboard()
+    });
+  }
+
+  let text = `👥 *Bot foydalanuvchilari* (Jami *${users.length}*):\n\n`;
+  users.forEach((u, i) => {
+    const username = u.username ? `@${u.username}` : "Username yo'q";
+    text += `${i + 1}. *${u.first_name} ${u.last_name || ""}* — ${username} (\`${u.id}\`)\n`;
+  });
+
+  ctx.editMessageText(text, {
+    parse_mode: "Markdown",
+    ...adminKeyboard()
+  });
+});
+
+// Admin broadcast prompt
+bot.action("admin_broadcast_prompt", (ctx) => {
+  const userId = ctx.from.id;
+  if (String(userId) !== String(ADMIN_CHAT_ID)) return ctx.answerCbQuery("Taqqiqlangan!");
+  
+  ctx.answerCbQuery();
+  adminStates.set(userId, "broadcast");
+  
+  ctx.editMessageText(
+    `📢 *Xabar yuborish bo'limi (Broadcast)*\n\n` +
+    `Barcha foydalanuvchilarga yubormoqchi bo'lgan xabaringizni yozib yuboring.\n\n` +
+    `• _Xabarda matnlar, havolalar va emojilar ishlatishingiz mumkin._\n` +
+    `• _Bekor qilish uchun_ *bekor* _deb yozing._`,
+    {
+      parse_mode: "Markdown",
+      ...Markup.inlineKeyboard([[Markup.button.callback("❌ Bekor qilish", "admin_main")]])
+    }
+  );
+});
+
+// Return to admin main menu
+bot.action("admin_main", (ctx) => {
+  const userId = ctx.from.id;
+  if (String(userId) !== String(ADMIN_CHAT_ID)) return ctx.answerCbQuery("Taqqiqlangan!");
+  
+  ctx.answerCbQuery();
+  adminStates.delete(userId);
+  
+  ctx.editMessageText(
+    `⚙️ *Deutsch Hub — Admin Paneli*\n\nBoshqaruv bo'limini tanlang:`,
+    { parse_mode: "Markdown", ...adminKeyboard() }
+  );
 });
 
 // Menu Navigation Handlers
@@ -326,9 +437,64 @@ bot.action("quiz_stop", (ctx) => {
   });
 });
 
-// Handle text messages as real-time search queries
-bot.on("text", (ctx) => {
-  const query = ctx.message.text.trim().toLowerCase();
+// Handle text messages as real-time search queries or admin broadcast messages
+bot.on("text", async (ctx) => {
+  const userId = ctx.from.id;
+  const msgText = ctx.message.text;
+
+  // Check if admin is currently broadcasting
+  if (String(userId) === String(ADMIN_CHAT_ID) && adminStates.get(userId) === "broadcast") {
+    if (msgText.toLowerCase().trim() === "bekor") {
+      adminStates.delete(userId);
+      return ctx.reply("❌ Xabar yuborish bekor qilindi.", Markup.inlineKeyboard([[Markup.button.callback("⚙️ Admin paneliga qaytish", "admin_main")]]));
+    }
+
+    adminStates.delete(userId);
+    const users = getUsers();
+    
+    if (users.length === 0) {
+      return ctx.reply("👥 Yuborish uchun birorta ham foydalanuvchi topilmadi.");
+    }
+
+    const statusMsg = await ctx.reply(`📢 *Xabar yuborish boshlandi...*\n\nJami foydalanuvchilar: *${users.length} ta*`, { parse_mode: "Markdown" });
+    
+    let success = 0;
+    let fail = 0;
+
+    for (const u of users) {
+      try {
+        await ctx.telegram.sendMessage(u.id, msgText);
+        success++;
+      } catch (err) {
+        console.error(`⚠️ User ${u.id} ga xabar yuborishda xato:`, err.message);
+        fail++;
+      }
+      // Simple sleep/delay to prevent Telegram rate limit issues (20-30 messages per second limit)
+      await new Promise(resolve => setTimeout(resolve, 50));
+    }
+
+    return ctx.telegram.editMessageText(
+      ctx.chat.id,
+      statusMsg.message_id,
+      undefined,
+      `✅ *Xabar yuborish yakunlandi!*\n\n` +
+      `• Muvaffaqiyatli yetkazildi: *${success} ta*\n` +
+      `• Yetkazib berilmadi (bloklangan): *${fail} ta*`,
+      {
+        parse_mode: "Markdown",
+        ...Markup.inlineKeyboard([[Markup.button.callback("⚙️ Admin paneliga qaytish", "admin_main")]])
+      }
+    ).catch(err => {
+      ctx.replyWithMarkdown(
+        `✅ *Xabar yuborish yakunlandi!*\n\n` +
+        `• Muvaffaqiyatli yetkazildi: *${success} ta*\n` +
+        `• Yetkazib berilmadi: *${fail} ta*`,
+        Markup.inlineKeyboard([[Markup.button.callback("⚙️ Admin paneliga qaytish", "admin_main")]])
+      );
+    });
+  }
+
+  const query = text.trim().toLowerCase();
   
   // Skip command prefix
   if (query.startsWith("/")) return;
