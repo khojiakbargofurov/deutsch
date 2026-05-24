@@ -1,8 +1,10 @@
 import { Telegraf, Markup } from "telegraf";
 import dotenv from "dotenv";
 import http from "http";
-import { VOCAB, TIPS } from "./data.js";
-import { addUser, getUsers } from "./usersStore.js";
+import path from "path";
+import { fileURLToPath } from "url";
+import { VOCAB, TIPS, DAILY_WORDS } from "./data.js";
+import { addUser, getUsers, updateHighScore, getLeaderboard } from "./usersStore.js";
 
 dotenv.config();
 
@@ -57,7 +59,7 @@ function buildBotQuiz() {
 const mainKeyboard = () => {
   return Markup.inlineKeyboard([
     [Markup.button.callback("📚 Lug'at Bo'limi", "menu_vocab"), Markup.button.callback("🧠 Test Boshlash", "menu_quiz")],
-    [Markup.button.callback("📖 Muhim Maslahatlar", "menu_tips")],
+    [Markup.button.callback("🏆 Top O'quvchilar", "menu_leaderboard"), Markup.button.callback("📖 Muhim Maslahatlar", "menu_tips")],
     [Markup.button.webApp("🌐 Deutsch Hub Saytini Ochish", WEB_APP_URL)]
   ]);
 };
@@ -127,7 +129,7 @@ bot.command("myid", (ctx) => {
 const adminKeyboard = () => {
   return Markup.inlineKeyboard([
     [Markup.button.callback("📊 Statistika", "admin_stats"), Markup.button.callback("👥 Foydalanuvchilar", "admin_users")],
-    [Markup.button.callback("📢 Xabar yuborish", "admin_broadcast_prompt")],
+    [Markup.button.callback("📢 Xabar yuborish", "admin_broadcast_prompt"), Markup.button.callback("📅 Kunlik so'z", "admin_daily_word")],
     [Markup.button.callback("🏠 Bosh menyu", "menu_main")]
   ]);
 };
@@ -221,6 +223,28 @@ bot.action("admin_main", (ctx) => {
   );
 });
 
+// Admin daily word manual trigger
+bot.action("admin_daily_word", async (ctx) => {
+  const userId = ctx.from.id;
+  if (String(userId) !== String(ADMIN_CHAT_ID)) return ctx.answerCbQuery("Taqqiqlangan!");
+  
+  ctx.answerCbQuery("Yuborilmoqda...");
+  ctx.editMessageText("⏳ *Kunlik so'z barcha foydalanuvchilarga yuborilmoqda...*", { parse_mode: "Markdown" });
+  
+  const result = await sendDailyWord(bot);
+  
+  if (result) {
+    ctx.replyWithMarkdown(
+      `✅ *Kunlik so'z muvaffaqiyatli yuborildi!*\n\n` +
+      `• So'z: *${result.word.de}* — *${result.word.uz}*\n` +
+      `• Yetkazildi: *${result.success} ta*`,
+      Markup.inlineKeyboard([[Markup.button.callback("⚙️ Admin paneliga qaytish", "admin_main")]])
+    );
+  } else {
+    ctx.reply("❌ Yuborishda xatolik yuz berdi.", Markup.inlineKeyboard([[Markup.button.callback("⚙️ Admin paneliga qaytish", "admin_main")]]));
+  }
+});
+
 // Menu Navigation Handlers
 bot.action("menu_main", (ctx) => {
   ctx.answerCbQuery();
@@ -228,6 +252,37 @@ bot.action("menu_main", (ctx) => {
     `*Deutsch Hub — Bosh Menyusi*\n\nO'rganishni davom ettirish uchun bo'limni tanlang:`,
     { parse_mode: "Markdown", ...mainKeyboard() }
   );
+});
+
+// Leaderboard callback
+bot.action("menu_leaderboard", (ctx) => {
+  ctx.answerCbQuery();
+  const topUsers = getLeaderboard();
+  
+  let text = `🏆 *Deutsch Hub — Top O'quvchilar Reytingi* 🏆\n\n` +
+             `Foydalanuvchilarning Quiz (testlar) bo'yicha eng yuqori erishgan rekord natijalari:\n\n`;
+               
+  if (topUsers.length === 0) {
+    text += `*Hali hech kim test topshirmadi.* Birinchi bo'lib testni boshlang va rekord o'rnating! 🚀`;
+  } else {
+    const medals = ["🥇", "🥈", "🥉", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"];
+    topUsers.forEach((u, i) => {
+      const icon = medals[i] || "🔹";
+      const name = `${u.first_name} ${u.last_name || ""}`.trim();
+      const username = u.username ? ` (@${u.username})` : "";
+      text += `${icon} *${name}*${username} — *${u.highScore} ball*\n`;
+    });
+  }
+
+  text += `\n🎯 Siz ham test yechib o'z rekordingizni o'rnating!`;
+
+  ctx.editMessageText(text, {
+    parse_mode: "Markdown",
+    ...Markup.inlineKeyboard([
+      [Markup.button.callback("🧠 Testni boshlash", "menu_quiz")],
+      [Markup.button.callback("⬅️ Bosh menyuga qaytish", "menu_main")]
+    ])
+  });
 });
 
 // TIPS section
@@ -394,15 +449,28 @@ bot.action(/^quiz_ans_(correct|wrong)_(\d+)$/, (ctx) => {
     // Finished Quiz
     const finalScore = session.score;
     const total = questions.length;
+
+    // Update high score in DB
+    const { updated, oldHighScore } = updateHighScore(ctx.from.id, finalScore);
+
     let emoji = "🎖";
     if (finalScore >= 9) emoji = "🏆 Ajoyib natija!";
     else if (finalScore >= 7) emoji = "🌟 Yaxshi natija!";
     else if (finalScore >= 5) emoji = "👍 Qoniqarli!";
     else emoji = "📚 Ko'proq lug'at yodlang!";
 
+    let recordText = "";
+    if (updated) {
+      recordText = `🎉 *YANGI SHAXSIY REKORD!* \nAvvalgi rekord: *${oldHighScore} ball* ➡️ Yangi rekord: *${finalScore} ball*\n\n`;
+    } else {
+      const currentHighScore = Math.max(oldHighScore, finalScore);
+      recordText = `🎯 Sizning eng yuqori natijangiz: *${currentHighScore} ball*\n\n`;
+    }
+
     const resultText = 
       `🏁 *Test yakunlandi!*\n\n` +
       `${feedback}\n\n` +
+      `${recordText}` +
       `📊 *Natijangiz:*\n` +
       `• To'g'ri javoblar: *${finalScore}/${total}*\n` +
       `• Baholash: *${emoji}*\n\n` +
@@ -542,6 +610,145 @@ bot.on("text", async (ctx) => {
   ctx.replyWithMarkdown(text, Markup.inlineKeyboard([
     [Markup.button.callback("🏠 Bosh menyu", "menu_main"), Markup.button.webApp("🌐 To'liq Lug'at sayti", WEB_APP_URL)]
   ]));
+});
+
+// ── DAILY WORD BROADCAST HELPER & SCHEDULER ──
+
+const STATUS_FILE = path.join(path.dirname(fileURLToPath(import.meta.url)), "dailyStatus.json");
+
+function getDailyStatus() {
+  try {
+    if (fs.existsSync(STATUS_FILE)) {
+      const data = fs.readFileSync(STATUS_FILE, "utf8");
+      return JSON.parse(data || "{}");
+    }
+  } catch (err) {
+    console.error("⚠️ dailyStatus.json o'qishda xato:", err);
+  }
+  return {};
+}
+
+function saveDailyStatus(status) {
+  try {
+    fs.writeFileSync(STATUS_FILE, JSON.stringify(status, null, 2));
+  } catch (err) {
+    console.error("⚠️ dailyStatus.json yozishda xato:", err);
+  }
+}
+
+// Helper: Send Daily Word Broadcast
+async function sendDailyWord(botInstance) {
+  try {
+    // Select word based on current day of the year
+    const dayOfYear = Math.floor((new Date() - new Date(new Date().getFullYear(), 0, 0)) / 86400000);
+    const wordIdx = dayOfYear % DAILY_WORDS.length;
+    const word = DAILY_WORDS[wordIdx];
+
+    const message = 
+      `🌟 *KUNLIK YANGI SO'Z* 🌟\n\n` +
+      `🇩🇪 *Nemischa:* \`${word.de}\`\n` +
+      `🇺🇿 *O'zbekcha:* *${word.uz}*\n\n` +
+      `📝 *Gapda ishlatilishi:*\n` +
+      `• _${word.exampleDe}_\n` +
+      `👉 _${word.exampleUz}_\n\n` +
+      `📚 Lug'at orqali bilimingizni boyitishda davom eting!`;
+
+    const users = getUsers();
+    let success = 0;
+    
+    for (const u of users) {
+      try {
+        await botInstance.telegram.sendMessage(u.id, message, { parse_mode: "Markdown" });
+        success++;
+      } catch (err) {
+        console.error(`⚠️ User ${u.id} ga kunlik so'z yuborilmadi:`, err.message);
+      }
+      await new Promise(resolve => setTimeout(resolve, 50));
+    }
+    
+    console.log(`📢 Kunlik so'z ${users.length} ta foydalanuvchidan ${success} tasiga yuborildi.`);
+    return { success, word };
+  } catch (err) {
+    console.error("❌ Kunlik so'z yuborishda xato:", err);
+    return null;
+  }
+}
+
+// Word of the Day scheduler loop (checks every 15 minutes)
+setInterval(async () => {
+  const now = new Date();
+  const uzTime = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Tashkent" }));
+  const uzHours = uzTime.getHours();
+  const uzDateStr = uzTime.toISOString().slice(0, 10);
+
+  // Check if it's 9:00 AM (or between 9:00 and 10:00 AM) in Tashkent
+  if (uzHours === 9) {
+    const status = getDailyStatus();
+    if (status.lastSentDate !== uzDateStr) {
+      status.lastSentDate = uzDateStr;
+      saveDailyStatus(status);
+      console.log(`⏰ Avtomatik kunlik so'z yuborish boshlandi (Sana: ${uzDateStr})...`);
+      await sendDailyWord(bot);
+    }
+  }
+}, 15 * 60 * 1000);
+
+// ── TELEGRAM INLINE QUERY MODE ──
+
+bot.on("inline_query", (ctx) => {
+  const query = ctx.inlineQuery.query.trim().toLowerCase();
+  if (!query) {
+    return ctx.answerInlineQuery([], {
+      switch_pm_text: "Qidirish uchun so'z yozing (Masalan: der Mensch)...",
+      switch_pm_parameter: "inline_help"
+    });
+  }
+
+  const matches = [];
+  for (const [cat, words] of Object.entries(VOCAB)) {
+    words.forEach(w => {
+      if (w.de.toLowerCase().includes(query) || w.uz.toLowerCase().includes(query)) {
+        matches.push({ ...w, cat });
+      }
+    });
+  }
+
+  const categoryLabels = {
+    Verben: "🔴 Fe'llar",
+    Nomen: "🟡 Otlar",
+    Adjektive: "🟢 Sifatlar",
+    Adverbien: "🔵 Ravishlar"
+  };
+
+  const results = matches.slice(0, 10).map((w, idx) => {
+    const title = `${w.de} — ${w.uz}`;
+    const description = `Turkumi: ${categoryLabels[w.cat]}`;
+    const messageText = 
+      `🇩🇪 *Nemischa:* \`${w.de}\`\n` +
+      `🇺🇿 *O'zbekcha:* *${w.uz}*\n\n` +
+      `📁 *Turkumi:* _${categoryLabels[w.cat]}_\n` +
+      `🌐 [Deutsch Hub Saytiga O'tish](${WEB_APP_URL})`;
+
+    return {
+      type: "article",
+      id: `inline_${w.de}_${idx}`,
+      title: title,
+      description: description,
+      thumb_url: "https://upload.wikimedia.org/wikipedia/commons/thumb/b/ba/Flag_of_Germany.svg/200px-Flag_of_Germany.svg.png",
+      input_message_content: {
+        message_text: messageText,
+        parse_mode: "Markdown",
+        disable_web_page_preview: true
+      },
+      reply_markup: {
+        inline_keyboard: [
+          [{ text: "🌐 Veb-saytni ochish", web_app: { url: WEB_APP_URL } }]
+        ]
+      }
+    };
+  });
+
+  return ctx.answerInlineQuery(results, { cache_time: 300 });
 });
 
 // Catch errors gracefully

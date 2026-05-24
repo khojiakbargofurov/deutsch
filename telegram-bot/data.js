@@ -143,3 +143,16 @@ export const VOCAB = {
     { de: "notfalls", uz: "zarur bo'lsa" }, { de: "ansonsten", uz: "aks holda" }, { de: "weiterhin", uz: "bundan keyin ham" },
   ],
 };
+
+export const DAILY_WORDS = [
+  { de: "lernen", uz: "o'rganmoq", exampleDe: "Ich lerne jeden Tag Deutsch mit Deutsch Hub.", exampleUz: "Men har kuni Deutsch Hub yordamida nemis tilini o'rganaman." },
+  { de: "sprechen", uz: "gapirmoq", exampleDe: "Er spricht fließend und selbstbewusst Deutsch.", exampleUz: "U nemis tilida ravon va ishonch bilan gapiradi." },
+  { de: "der Erfolg", uz: "muvaffaqiyat", exampleDe: "Fleiß ist der Schlüssel zum Erfolg beim Sprachenlernen.", exampleUz: "G'ayrat (mehnatsevarlik) — til o'rganishda muvaffaqiyat kalitidir." },
+  { de: "verstehen", uz: "tushunmoq", exampleDe: "Mit etwas Übung kann ich deutsche Podcasts gut verstehen.", exampleUz: "Biroz mashq bilan nemischa podkastlarni yaxshi tushuna olaman." },
+  { de: "versuchen", uz: "urinib ko'rmoq / harakat qilmoq", exampleDe: "Versuche immer, auf Deutsch zu denken.", exampleUz: "Doimo nemis tilida o'ylashga harakat qiling." },
+  { de: "die Geduld", uz: "sabr-toqat", exampleDe: "Sprachenlernen braucht Zeit und viel Geduld.", exampleUz: "Til o'rganish vaqt va ko'p sabr-toqat talab qiladi." },
+  { de: "verbessern", uz: "yaxshilamoq / rivojlantirmoq", exampleDe: "Ich möchte meinen deutschen Wortschatz verbessern.", exampleUz: "Men nemischa so'z boyligimni yaxshilamoqchiman." },
+  { de: "die Gewohnheit", uz: "odat", exampleDe: "Tägliches Lernen ist eine großartige Gewohnheit.", exampleUz: "Har kuni o'rganish — ajoyib odatdir." },
+  { de: "glauben", uz: "ishonmoq", exampleDe: "Glaube an dich selbst und deine Fähigkeiten!", exampleUz: "O'zingizga va qobiliyatingizga ishoning!" },
+  { de: "erreichen", uz: "erishmoq", exampleDe: "Ich werde mein Ziel erreichen, fließend Deutsch zu sprechen.", exampleUz: "Nemis tilida ravon gapirish maqsadimga erishaman." }
+];

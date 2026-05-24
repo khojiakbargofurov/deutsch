@@ -41,6 +41,7 @@ export function addUser(user) {
       first_name: user.first_name || "",
       last_name: user.last_name || "",
       username: user.username || "",
+      highScore: 0,
       joinedAt: new Date().toISOString()
     });
     saveUsers(users);
@@ -57,9 +58,41 @@ export function addUser(user) {
       users[idx].username = user.username || "";
       updated = true;
     }
+    // Backward compatibility: initialize highScore if missing in old record
+    if (users[idx].highScore === undefined) {
+      users[idx].highScore = 0;
+      updated = true;
+    }
     if (updated) {
       saveUsers(users);
     }
     return false; // Already existed
   }
+}
+
+// Update user's highest score
+export function updateHighScore(userId, score) {
+  const users = getUsers();
+  const idx = users.findIndex(u => String(u.id) === String(userId));
+  
+  if (idx !== -1) {
+    const currentHighScore = users[idx].highScore || 0;
+    if (score > currentHighScore) {
+      users[idx].highScore = score;
+      saveUsers(users);
+      return { updated: true, oldHighScore: currentHighScore };
+    }
+    return { updated: false, oldHighScore: currentHighScore };
+  }
+  return { updated: false, oldHighScore: 0 };
+}
+
+// Get top 10 users sorted by high score desc
+export function getLeaderboard() {
+  const users = getUsers();
+  // Filter out users who haven't played or have 0 score, then sort
+  return users
+    .filter(u => u.highScore > 0)
+    .sort((a, b) => b.highScore - a.highScore)
+    .slice(0, 10);
 }
