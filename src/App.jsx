@@ -628,14 +628,25 @@ export default function App() {
 
           <div className="grid-3" style={{ marginBottom: 40 }}>
             {[
-              { emoji: "📖", title: "5 ta Maslahat", sub: "Ravon gaplashish uchun yo'riqnoma", go: "tips" },
-              { emoji: "📚", title: "Lug'at", sub: `${allCount}+ so'z, 4 kategoriya`, go: "vocab" },
-              { emoji: "🧠", title: "Quiz", sub: "Takrorlashsiz 20 ta savol", go: "quizSetup" },
+              { emoji: "📖", title: "5 ta Maslahat", sub: "Ravon gaplashish uchun yo'riqnoma", go: "tips", color: "#2ecc71" },
+              { emoji: "📚", title: "Lug'at Bazasi", sub: `${allCount}+ so'z, 4 kategoriya`, go: "vocab", color: "#e63946" },
+              { emoji: "🧠", title: "Interaktiv Quiz", sub: "Takrorlashsiz 20 ta savol", go: "quizSetup", color: "#0088cc" },
+              { emoji: "🎮", title: "So'z Top O'yini", sub: "Tezkor bilingual xotira o'yini", go: "matchSetup", color: "#f4d03f" },
+              { emoji: "📊", title: "Natijalar", sub: "Progress tahlili va nishonlar", go: "stats", color: "#e67e22" },
+              { emoji: "✍️", title: "Yozish Mashqi", sub: "Umlautlar bilan diktant o'yini", go: "spellingSetup", color: "#9b59b6" },
             ].map(item => (
-              <div key={item.go} className="home-tile" onClick={() => navigate(item.go)}>
+              <div key={item.go} className="home-tile" onClick={() => navigate(item.go)} style={{ position: "relative", overflow: "hidden" }}>
+                <div style={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  width: "100%",
+                  height: "3px",
+                  background: `linear-gradient(90deg, ${item.color}, transparent)`
+                }} />
                 <div style={{ fontSize: 36, marginBottom: 14 }}>{item.emoji}</div>
                 <div style={{ fontFamily: "'Playfair Display',serif", fontSize: 19, fontWeight: 700, marginBottom: 6 }}>{item.title}</div>
-                <div style={{ fontSize: 12, color: "var(--text-muted)" }}>{item.sub}</div>
+                <div style={{ fontSize: 12, color: "var(--text-muted)", lineHeight: 1.4 }}>{item.sub}</div>
               </div>
             ))}
           </div>
