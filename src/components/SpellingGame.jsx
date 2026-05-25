@@ -30,17 +30,17 @@ export default function SpellingGame({
     return (
       <div style={{ ...S.inner, maxWidth: 520 }} className="inner-pad">
         <h2 style={{ fontFamily: "'Playfair Display',serif", fontSize: "clamp(24px,6vw,36px)", fontWeight: 900, marginBottom: 6 }}>
-          Yozish <span style={{ color: "#f4d03f" }}>Mashqi</span>
+          Yozish <span style={{ color: "var(--accent)" }}>Mashqi</span>
         </h2>
         <p style={{ fontSize: 13, color: "var(--text-light)", marginBottom: 32 }}>
           Harfma-harf to'g'ri yozish orqali so'zlarni xotirada mustahkam saqlang.
         </p>
 
         <div style={{ marginBottom: 28 }}>
-          <div style={{ fontSize: 11, color: "#f4d03f", letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 14 }}>Kategoriya tanlang</div>
+          <div style={{ fontSize: 11, color: "var(--accent)", letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 14 }}>Kategoriya tanlang</div>
           <div className="chips-row">
             <button className={`chip ${spellingCat === "all" ? "chip-act" : ""}`}
-              style={spellingCat === "all" ? { background: "#f4d03f", borderColor: "#f4d03f", color: "#0d0d0d", fontWeight: 600 } : {}}
+              style={spellingCat === "all" ? { background: "var(--color)", borderColor: "var(--color)", color: "var(--bg)", fontWeight: 600 } : {}}
               onClick={() => setSpellingCat("all")}>🌐 Hammasi ({allCount})</button>
             {Object.entries(CAT_META).map(([cat, m]) => (
               <button key={cat}
@@ -50,7 +50,7 @@ export default function SpellingGame({
             ))}
             <button 
               className={`chip ${spellingCat === "favorites" ? "chip-act" : ""}`}
-              style={spellingCat === "favorites" ? { background: "#f1c40f", borderColor: "#f1c40f", color: "#0d0d0d", fontWeight: 600 } : {}}
+              style={spellingCat === "favorites" ? { background: "var(--accent)", borderColor: "var(--accent)", color: "var(--bg)", fontWeight: 600 } : {}}
               onClick={() => setSpellingCat("favorites")}
             >
               🌟 Tanlanganlar ({favorites.length})
@@ -70,7 +70,7 @@ export default function SpellingGame({
               ["Tekshiruv", "Real-vaqtda"],
             ].map(([l, v]) => (
               <div key={l}>
-                <div style={{ fontFamily: "'Playfair Display',serif", fontSize: 24, fontWeight: 900, color: "#f4d03f" }}>{v}</div>
+                <div style={{ fontFamily: "'Playfair Display',serif", fontSize: 24, fontWeight: 900, color: "var(--accent)" }}>{v}</div>
                 <div style={{ fontSize: 12, color: "#444" }}>{l}</div>
               </div>
             ))}
@@ -114,7 +114,7 @@ export default function SpellingGame({
 
             {/* Progress bar */}
             <div className="prog-bar" style={{ marginBottom: 22 }}>
-              <div className="prog-fill" style={{ width: `${(spellingIdx / spellingQuestions.length) * 100}%`, background: "linear-gradient(90deg, #f4d03f, #2ecc71)" }} />
+              <div className="prog-fill" style={{ width: `${(spellingIdx / spellingQuestions.length) * 100}%`, background: "linear-gradient(90deg, var(--accent), var(--color))" }} />
             </div>
 
             <div style={{ textAlign: "center", fontSize: 13, color: "var(--text-muted)", marginBottom: 12 }}>
@@ -198,8 +198,8 @@ export default function SpellingGame({
 
             <div style={{ display: "flex", justifyContent: "center", marginBottom: 36 }}>
               <div className="score-ring" style={{
-                borderColor: spellingAttempts === 0 ? "#2ecc71" : spellingAttempts <= 3 ? "#f4d03f" : "#e63946",
-                background: spellingAttempts === 0 ? "#0d1c10" : spellingAttempts <= 3 ? "#1c1a0d" : "#1c0d0d",
+                borderColor: spellingAttempts === 0 ? "#2ecc71" : spellingAttempts <= 3 ? "var(--accent)" : "#e63946",
+                background: spellingAttempts === 0 ? "rgba(46, 204, 113, 0.05)" : spellingAttempts <= 3 ? "rgba(229, 193, 88, 0.05)" : "rgba(230, 57, 70, 0.05)",
                 width: 150,
                 height: 150
               }}>

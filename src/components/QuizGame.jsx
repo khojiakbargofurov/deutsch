@@ -39,15 +39,15 @@ export default function QuizGame({
     return (
       <div style={{ ...S.inner, maxWidth: 520 }} className="inner-pad">
         <h2 style={{ fontFamily: "'Playfair Display',serif", fontSize: "clamp(24px,6vw,36px)", fontWeight: 900, marginBottom: 6 }}>
-          Quiz <span style={{ color: "#f4d03f" }}>Sozlamalari</span>
+          Quiz <span style={{ color: "var(--accent)" }}>Sozlamalari</span>
         </h2>
         <p style={{ fontSize: 13, color: "#555", marginBottom: 32 }}>20 ta takrorlanmaydigan savol • To'g'ri javobni tanlang</p>
 
         <div style={{ marginBottom: 28 }}>
-          <div style={{ fontSize: 11, color: "#f4d03f", letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 14 }}>Kategoriya tanlang</div>
+          <div style={{ fontSize: 11, color: "var(--accent)", letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 14 }}>Kategoriya tanlang</div>
           <div className="chips-row">
             <button className={`chip ${quizCat === "all" ? "chip-act" : ""}`}
-              style={quizCat === "all" ? { background: "#f4d03f", borderColor: "#f4d03f", color: "#0d0d0d", fontWeight: 600 } : {}}
+              style={quizCat === "all" ? { background: "var(--color)", borderColor: "var(--color)", color: "var(--bg)", fontWeight: 600 } : {}}
               onClick={() => setQuizCat("all")}>🌐 Hammasi ({allCount})</button>
             {Object.entries(CAT_META).map(([cat, m]) => (
               <button key={cat}
@@ -57,7 +57,7 @@ export default function QuizGame({
             ))}
             <button 
               className={`chip ${quizCat === "favorites" ? "chip-act" : ""}`}
-              style={quizCat === "favorites" ? { background: "#f1c40f", borderColor: "#f1c40f", color: "#0d0d0d", fontWeight: 600 } : {}}
+              style={quizCat === "favorites" ? { background: "var(--accent)", borderColor: "var(--accent)", color: "var(--bg)", fontWeight: 600 } : {}}
               onClick={() => setQuizCat("favorites")}
             >
               🌟 Tanlanganlar ({favorites.length})
@@ -77,7 +77,7 @@ export default function QuizGame({
               ["Takror", "Yo'q ✓"],
             ].map(([l, v]) => (
               <div key={l}>
-                <div style={{ fontFamily: "'Playfair Display',serif", fontSize: 26, fontWeight: 900, color: "#f4d03f" }}>{v}</div>
+                <div style={{ fontFamily: "'Playfair Display',serif", fontSize: 26, fontWeight: 900, color: "var(--accent)" }}>{v}</div>
                 <div style={{ fontSize: 12, color: "#444" }}>{l}</div>
               </div>
             ))}
@@ -104,13 +104,13 @@ export default function QuizGame({
     return (
       <div style={{ ...S.inner, maxWidth: 480, textAlign: "center" }} className="inner-pad">
         <h2 style={{ fontFamily: "'Playfair Display',serif", fontSize: "clamp(26px,6vw,38px)", fontWeight: 900, marginBottom: 32 }}>
-          Quiz <span style={{ color: "#f4d03f" }}>Yakunlandi!</span>
+          Quiz <span style={{ color: "var(--accent)" }}>Yakunlandi!</span>
         </h2>
 
         <div style={{ display: "flex", justifyContent: "center", marginBottom: 28 }}>
           <div className="score-ring" style={{
-            borderColor: score >= questions.length * .8 ? "#2ecc71" : score >= questions.length * .5 ? "#f4d03f" : "#e63946",
-            background: score >= questions.length * .8 ? "#0d1c10" : score >= questions.length * .5 ? "#1c1a0d" : "#1c0d0d",
+            borderColor: score >= questions.length * .8 ? "#2ecc71" : score >= questions.length * .5 ? "var(--accent)" : "#e63946",
+            background: score >= questions.length * .8 ? "rgba(46, 204, 113, 0.05)" : score >= questions.length * .5 ? "rgba(229, 193, 88, 0.05)" : "rgba(230, 57, 70, 0.05)",
           }}>
             <div style={{ fontFamily: "'Playfair Display',serif", fontSize: 40, fontWeight: 900, lineHeight: 1 }}>{score}</div>
             <div style={{ fontSize: 12, color: "#555" }}>/ {questions.length}</div>
@@ -146,7 +146,7 @@ export default function QuizGame({
         {/* Header row */}
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
           <span style={{ fontSize: 13, color: "#555" }}>{qIdx + 1} / {questions.length}</span>
-          <span style={{ fontSize: 13, color: "#f4d03f", fontWeight: 600 }}>✓ {score} to'g'ri</span>
+          <span style={{ fontSize: 13, color: "var(--accent)", fontWeight: 600 }}>✓ {score} to'g'ri</span>
         </div>
         {/* Progress */}
         <div className="prog-bar">
@@ -168,7 +168,7 @@ export default function QuizGame({
             {q.word.de}
           </div>
           <div style={{ marginTop: 14, display: "inline-block", background: "#161616", borderRadius: 20, padding: "4px 14px" }}>
-            <span style={{ fontSize: 11, color: CAT_META[q.word.cat]?.accent || "#f4d03f", letterSpacing: 1 }}>
+            <span style={{ fontSize: 11, color: CAT_META[q.word.cat]?.accent || "var(--accent)", letterSpacing: 1 }}>
               {CAT_META[q.word.cat]?.label}
             </span>
           </div>

@@ -13,7 +13,7 @@ export default function Home({ navigate, allCount }) {
           display: "inline-block", background: "var(--card-bg)", border: "1px solid var(--border-color)",
           borderRadius: 30, padding: "5px 16px", marginBottom: 22
         }}>
-          <span style={{ fontSize: 11, color: "#f4d03f", letterSpacing: 2, textTransform: "uppercase" }}>
+          <span style={{ fontSize: 11, color: "var(--accent)", letterSpacing: 2, textTransform: "uppercase" }}>
             Nemis tili o'rganish platformasi
           </span>
         </div>
@@ -21,7 +21,7 @@ export default function Home({ navigate, allCount }) {
           fontFamily: "'Playfair Display',serif", fontWeight: 900,
           fontSize: "clamp(34px,8vw,60px)", lineHeight: 1.1, marginBottom: 18
         }}>
-          Fließend<br /><span style={{ color: "#f4d03f" }}>Deutsch</span> sprechen
+          Fließend<br /><span style={{ color: "var(--accent)" }}>Deutsch</span> sprechen
         </h1>
         <p style={{ fontSize: 15, color: "var(--text-light)", lineHeight: 1.7, maxWidth: 440, margin: "0 auto" }}>
           {allCount}+ so'z, 5 ta muhim maslahat va takrorlashsiz interaktiv quiz — o'zbek tilida nemis tilini o'rgan!
@@ -33,7 +33,7 @@ export default function Home({ navigate, allCount }) {
           { emoji: "📖", title: "5 ta Maslahat", sub: "Ravon gaplashish uchun yo'riqnoma", go: "tips", color: "#2ecc71" },
           { emoji: "📚", title: "Lug'at Bazasi", sub: `${allCount}+ so'z, 4 kategoriya`, go: "vocab", color: "#e63946" },
           { emoji: "🧠", title: "Interaktiv Quiz", sub: "Takrorlashsiz 20 ta savol", go: "quizSetup", color: "#0088cc" },
-          { emoji: "🎮", title: "So'z Top O'yini", sub: "Tezkor bilingual xotira o'yini", go: "matchSetup", color: "#f4d03f" },
+          { emoji: "🎮", title: "So'z Top O'yini", sub: "Tezkor bilingual xotira o'yini", go: "matchSetup", color: "var(--accent)" },
           { emoji: "📊", title: "Natijalar", sub: "Progress tahlili va nishonlar", go: "stats", color: "#e67e22" },
           { emoji: "✍️", title: "Yozish Mashqi", sub: "Umlautlar bilan diktant o'yini", go: "spellingSetup", color: "#9b59b6" },
         ].map(item => (
@@ -54,7 +54,7 @@ export default function Home({ navigate, allCount }) {
       </div>
 
       <div style={{ background: "var(--card-bg)", border: "1px solid var(--border-color)", borderRadius: 18, padding: "24px 20px" }}>
-        <div style={{ fontSize: 11, color: "#f4d03f", letterSpacing: 2, textTransform: "uppercase", marginBottom: 18 }}>Qisqa xulosa</div>
+        <div style={{ fontSize: 11, color: "var(--accent)", letterSpacing: 2, textTransform: "uppercase", marginBottom: 18 }}>Qisqa xulosa</div>
         {TIPS.map((t, i) => (
           <div key={i} style={{ display: "flex", gap: 14, marginBottom: 14, alignItems: "flex-start" }}>
             <span style={{ fontFamily: "'Playfair Display',serif", fontSize: 20, fontWeight: 900, color: "var(--border-color)", minWidth: 30 }}>{t.number}</span>

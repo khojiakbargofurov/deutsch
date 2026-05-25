@@ -9,7 +9,7 @@ export default function Tips({ tipOpen, setTipOpen }) {
   return (
     <div style={S.inner} className="inner-pad">
       <h2 style={{ fontFamily: "'Playfair Display',serif", fontSize: "clamp(26px,6vw,36px)", fontWeight: 900, marginBottom: 6 }}>
-        5 ta Muhim <span style={{ color: "#f4d03f" }}>Maslahat</span>
+        5 ta Muhim <span style={{ color: "var(--accent)" }}>Maslahat</span>
       </h2>
       <p style={{ fontSize: 13, color: "#555", marginBottom: 32 }}>Nemischa ravon gaplashish uchun asosiy yo'riqnoma</p>
 

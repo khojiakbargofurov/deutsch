@@ -9,7 +9,7 @@ export default function StatsDashboard({ favorites, learntWords, quizHistory, fa
     <div style={S.inner} className="inner-pad">
       <div style={{ textAlign: "center", marginBottom: 36 }}>
         <h2 style={{ fontFamily: "'Playfair Display',serif", fontSize: "clamp(26px,6vw,38px)", fontWeight: 900, marginBottom: 8 }}>
-          Natijalar <span style={{ color: "#f4d03f" }}>Tahlili</span>
+          Natijalar <span style={{ color: "var(--accent)" }}>Tahlili</span>
         </h2>
         <p style={{ fontSize: 14, color: "var(--text-light)", lineHeight: 1.6, maxWidth: 460, margin: "0 auto" }}>
           Shaxsiy o'zlashtirish ko'rsatkichlari, testlar tarixi va erishilgan yutuqlar.
@@ -20,7 +20,7 @@ export default function StatsDashboard({ favorites, learntWords, quizHistory, fa
       <div className="grid-3" style={{ marginBottom: 32, gap: 12 }}>
         <div className="home-tile" style={{ padding: "16px 12px", cursor: "default", transform: "none" }}>
           <div style={{ fontSize: 26, marginBottom: 6 }}>🌟</div>
-          <div style={{ fontFamily: "'Playfair Display',serif", fontSize: 24, fontWeight: 900, color: "#f4d03f" }}>
+          <div style={{ fontFamily: "'Playfair Display',serif", fontSize: 24, fontWeight: 900, color: "var(--accent)" }}>
             {favorites.length}
           </div>
           <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 4 }}>Tanlangan so'zlar</div>
@@ -44,10 +44,10 @@ export default function StatsDashboard({ favorites, learntWords, quizHistory, fa
       </div>
 
       <div style={{ background: "var(--card-bg)", border: "1px solid var(--border-color)", borderRadius: 18, padding: "24px 20px", marginBottom: 32 }}>
-        <div style={{ fontSize: 11, color: "#f4d03f", letterSpacing: 1.5, textTransform: "uppercase", fontWeight: 600 }}>So'nggi 8 ta test grafigi</div>
+        <div style={{ fontSize: 11, color: "var(--accent)", letterSpacing: 1.5, textTransform: "uppercase", fontWeight: 600 }}>So'nggi 8 ta test grafigi</div>
         {quizHistory.length === 0 ? (
           <div style={{ padding: "40px 0", textAlign: "center", color: "var(--text-muted)", fontSize: 13 }}>
-            Hozircha natijalar mavjud emas. Quiz bo'limida o'zingizni sinab ko'ring!
+            Hozircha natijalar maroon emas. Quiz bo'limida o'zingizni sinab ko'ring!
           </div>
         ) : (
           <div>
@@ -73,7 +73,7 @@ export default function StatsDashboard({ favorites, learntWords, quizHistory, fa
 
       {/* Achievements Section */}
       <div style={{ background: "var(--card-bg)", border: "1px solid var(--border-color)", borderRadius: 18, padding: "24px 20px" }}>
-        <div style={{ fontSize: 11, color: "#f4d03f", letterSpacing: 1.5, textTransform: "uppercase", fontWeight: 600, marginBottom: 12 }}>Erishilgan Yutuqlar</div>
+        <div style={{ fontSize: 11, color: "var(--accent)", letterSpacing: 1.5, textTransform: "uppercase", fontWeight: 600, marginBottom: 12 }}>Erishilgan Yutuqlar</div>
         <div className="badges-grid">
           {[
             {
@@ -109,7 +109,7 @@ export default function StatsDashboard({ favorites, learntWords, quizHistory, fa
               <div className="badge-icon">{b.icon}</div>
               <div className="badge-title">{b.title}</div>
               <div className="badge-desc">{b.desc}</div>
-              <div style={{ fontSize: 10, marginTop: 8, color: b.unlocked ? "#f4d03f" : "var(--text-muted)", fontWeight: 600 }}>
+              <div style={{ fontSize: 10, marginTop: 8, color: b.unlocked ? "var(--accent)" : "var(--text-muted)", fontWeight: 600 }}>
                 {b.unlocked ? "✓ Bajarildi" : "🔒 Qulflangan"}
               </div>
             </div>

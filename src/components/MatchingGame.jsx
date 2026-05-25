@@ -26,17 +26,17 @@ export default function MatchingGame({
     return (
       <div style={{ ...S.inner, maxWidth: 520 }} className="inner-pad">
         <h2 style={{ fontFamily: "'Playfair Display',serif", fontSize: "clamp(24px,6vw,36px)", fontWeight: 900, marginBottom: 6 }}>
-          "So'z Top" <span style={{ color: "#f4d03f" }}>O'yini</span>
+          "So'z Top" <span style={{ color: "var(--accent)" }}>O'yini</span>
         </h2>
         <p style={{ fontSize: 13, color: "var(--text-light)", marginBottom: 32 }}>
           5 ta nemischa va 5 ta o'zbekcha so'zni juftlab topadigan premium interaktiv o'yin.
         </p>
 
         <div style={{ marginBottom: 28 }}>
-          <div style={{ fontSize: 11, color: "#f4d03f", letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 14 }}>Kategoriya tanlang</div>
+          <div style={{ fontSize: 11, color: "var(--accent)", letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 14 }}>Kategoriya tanlang</div>
           <div className="chips-row">
             <button className={`chip ${matchCat === "all" ? "chip-act" : ""}`}
-              style={matchCat === "all" ? { background: "#f4d03f", borderColor: "#f4d03f", color: "#0d0d0d", fontWeight: 600 } : {}}
+              style={matchCat === "all" ? { background: "var(--color)", borderColor: "var(--color)", color: "var(--bg)", fontWeight: 600 } : {}}
               onClick={() => setMatchCat("all")}>🌐 Hammasi</button>
             {Object.entries(CAT_META).map(([cat, m]) => (
               <button key={cat}
@@ -78,7 +78,7 @@ export default function MatchingGame({
 
             {/* Progress bar */}
             <div className="prog-bar" style={{ marginBottom: 22 }}>
-              <div className="prog-fill" style={{ width: `${(matchedIds.length / 10) * 100}%`, background: "linear-gradient(90deg, #0088cc, #2ecc71)" }} />
+              <div className="prog-fill" style={{ width: `${(matchedIds.length / 10) * 100}%`, background: "linear-gradient(90deg, var(--accent), var(--color))" }} />
             </div>
 
             <div style={{ textAlign: "center", marginBottom: 20 }}>
@@ -121,8 +121,8 @@ export default function MatchingGame({
 
             <div style={{ display: "flex", justifyContent: "center", marginBottom: 36 }}>
               <div className="score-ring" style={{
-                borderColor: attempts === 0 ? "#2ecc71" : attempts <= 2 ? "#f4d03f" : "#e63946",
-                background: attempts === 0 ? "#0d1c10" : attempts <= 2 ? "#1c1a0d" : "#1c0d0d",
+                borderColor: attempts === 0 ? "#2ecc71" : attempts <= 2 ? "var(--accent)" : "#e63946",
+                background: attempts === 0 ? "rgba(46, 204, 113, 0.05)" : attempts <= 2 ? "rgba(229, 193, 88, 0.05)" : "rgba(230, 57, 70, 0.05)",
                 width: 140,
                 height: 140
               }}>

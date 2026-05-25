@@ -30,7 +30,7 @@ export default function VocabList({
       <div className="vocab-hdr">
         <div>
           <h2 style={{ fontFamily: "'Playfair Display',serif", fontSize: "clamp(24px,5vw,34px)", fontWeight: 900, marginBottom: 4 }}>
-            Lug'at <span style={{ color: "#f4d03f" }}>Bazasi</span>
+            Lug'at <span style={{ color: "var(--accent)" }}>Bazasi</span>
           </h2>
           <p style={{ fontSize: 12, color: "#555" }}>{allCount} so'z • Nemischa → O'zbekcha</p>
         </div>
@@ -52,7 +52,7 @@ export default function VocabList({
         ))}
         <button 
           className={`chip ${vocabCat === "favorites" ? "chip-act" : ""}`}
-          style={vocabCat === "favorites" ? { background: "#f1c40f", borderColor: "#f1c40f", color: "#0d0d0d", fontWeight: 600 } : {}}
+          style={vocabCat === "favorites" ? { background: "var(--accent)", borderColor: "var(--accent)", color: "var(--bg)", fontWeight: 600 } : {}}
           onClick={() => { setVocabCat("favorites"); setFlashIdx(0); setFlipped(false); setVocabSearch(""); }}
         >
           🌟 Tanlanganlar <span style={{ opacity: .6 }}>({favorites.length})</span>
@@ -139,13 +139,13 @@ export default function VocabList({
             style={{ marginBottom: 16 }} />
           <div style={{ border: "1px solid var(--border-color)", borderRadius: 16, overflow: "hidden" }}>
             <div style={{
-              background: vocabCat === "favorites" ? "rgba(241, 196, 15, 0.08)" : (CAT_META[vocabCat]?.bg || "rgba(255,255,255,0.02)"),
+              background: vocabCat === "favorites" ? "rgba(229, 193, 88, 0.06)" : (CAT_META[vocabCat]?.bg || "rgba(255,255,255,0.02)"),
               padding: "10px 18px",
               display: "flex", justifyContent: "space-between", alignItems: "center"
             }}>
               <span style={{
                 fontSize: 12, 
-                color: vocabCat === "favorites" ? "#f1c40f" : (CAT_META[vocabCat]?.accent || "var(--color)"), 
+                color: vocabCat === "favorites" ? "var(--accent)" : (CAT_META[vocabCat]?.accent || "var(--color)"), 
                 fontWeight: 600,
                 letterSpacing: 1.2, textTransform: "uppercase"
               }}>
