@@ -241,6 +241,18 @@ export default function App() {
     });
   }, []);
 
+  const [playingWord, setPlayingWord] = useState(null);
+
+  const playAudio = useCallback((word) => {
+    if (!word) return;
+    setPlayingWord(word);
+    const ttsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(word)}&tl=de&client=tw-ob`;
+    const audio = new Audio(ttsUrl);
+    audio.addEventListener("ended", () => setPlayingWord(null));
+    audio.addEventListener("error", () => setPlayingWord(null));
+    audio.play().catch(() => setPlayingWord(null));
+  }, []);
+
   // quiz state
   const [quizCat, setQuizCat] = useState("all");
   const [questions, setQuestions] = useState([]);
@@ -384,6 +396,50 @@ export default function App() {
               </div>
             ))}
           </div>
+
+          {/* Telegram Bot Promo Card */}
+          <div className="tg-promo-card">
+            <div className="tg-promo-icon-wrap">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="m22 2-7 20-4-9-9-4Z"></path>
+                <path d="M22 2 11 13"></path>
+              </svg>
+            </div>
+            <h3 style={{ fontFamily: "'Playfair Display',serif", fontSize: 22, fontWeight: 900, marginBottom: 8 }}>
+              Telegram Botimizni Sinab Ko'ring! 🤖
+            </h3>
+            <p style={{ fontSize: 14, color: "var(--text-light)", lineHeight: 1.6 }}>
+              Nemis tilini yo'l-yo'lakay va yanada qiziqarliroq o'rganing. Botimiz orqali har kuni Toshkent vaqti bilan 09:00 da avtomatik yangi so'zlarni oling, interaktiv testlar yeching va guruhlarda tezkor inline qidiruvdan foydalaning!
+            </p>
+            
+            <div className="tg-features-grid">
+              <div className="tg-feature-item">
+                <span className="tg-feature-emoji">📅</span>
+                <div className="tg-feature-title">Kunlik Yangi So'z</div>
+                <div className="tg-feature-desc">Har kuni 09:00 da o'zbekcha gap namunalari bilan so'zlar.</div>
+              </div>
+              <div className="tg-feature-item">
+                <span className="tg-feature-emoji">🏆</span>
+                <div className="tg-feature-title">Top O'quvchilar</div>
+                <div className="tg-feature-desc">Testlarni yechib, eng yaxshi 10 o'quvchi ro'yxatidan joy oling.</div>
+              </div>
+              <div className="tg-feature-item">
+                <span className="tg-feature-emoji">🔍</span>
+                <div className="tg-feature-title">Inline Qidiruv</div>
+                <div className="tg-feature-desc">Guruhlarda shunchaki @deutch_blitz_bot yozib so'z qidiring.</div>
+              </div>
+            </div>
+            
+            <div style={{ display: "flex", justifyContent: "flex-start" }}>
+              <a href="https://t.me/deutch_blitz_bot" target="_blank" rel="noopener noreferrer" className="btn-tg">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="m22 2-7 20-4-9-9-4Z"></path>
+                  <path d="M22 2 11 13"></path>
+                </svg>
+                Telegram-da Ochish
+              </a>
+            </div>
+          </div>
         </div>
       )}
 
@@ -455,9 +511,21 @@ export default function App() {
               <div className="flash-wrap" onClick={() => setFlipped(f => !f)}>
                 <div className={`flash-inner ${flipped ? "flipped" : ""}`}>
                   <div className="flash-face flash-front">
-                    <div style={{ fontSize: 11, color: "#444", letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 12 }}>Nemischa</div>
-                    <div style={{ fontFamily: "'Playfair Display',serif", fontSize: "clamp(26px,6vw,38px)", fontWeight: 900 }}>{filtered[flashIdx]?.de}</div>
-                    <div style={{ fontSize: 12, color: "#333", marginTop: 12 }}>bosib o'zbek tiliga o'gir →</div>
+                    <div style={{ display: "flex", justifyContent: "space-between", width: "100%", alignItems: "center", marginBottom: 10, padding: "0 10px" }}>
+                      <span style={{ fontSize: 11, color: "var(--text-muted)", letterSpacing: 1.5, textTransform: "uppercase" }}>Nemischa</span>
+                      <button 
+                        className={`speaker-btn ${playingWord === filtered[flashIdx]?.de ? "playing" : ""}`}
+                        onClick={(e) => { e.stopPropagation(); playAudio(filtered[flashIdx]?.de); }}
+                        title="Talaffuzni eshitish"
+                      >
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                          <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                          <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                        </svg>
+                      </button>
+                    </div>
+                    <div style={{ fontFamily: "'Playfair Display',serif", fontSize: "clamp(26px,6vw,38px)", fontWeight: 900, margin: "16px 0" }}>{filtered[flashIdx]?.de}</div>
+                    <div style={{ fontSize: 12, color: "var(--text-light)", marginTop: 12 }}>bosib o'zbek tiliga o'gir →</div>
                   </div>
                   <div className="flash-face flash-back">
                     <div style={{ fontSize: 11, color: "#2ecc71", letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 12 }}>O'zbekcha</div>
@@ -491,9 +559,21 @@ export default function App() {
                 {filtered.length === 0
                   ? <div style={{ padding: 40, textAlign: "center", color: "#333", fontSize: 14 }}>Hech narsa topilmadi</div>
                   : filtered.map((w, i) => (
-                    <div key={i} className="vrow">
-                      <span style={{ fontFamily: "'Playfair Display',serif", fontSize: 16, fontWeight: 700 }}>{w.de}</span>
-                      <span style={{ fontSize: 13, color: "#666", textAlign: "right", marginLeft: 12 }}>{w.uz}</span>
+                    <div key={i} className="vrow" style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                        <button 
+                          className={`speaker-btn ${playingWord === w.de ? "playing" : ""}`}
+                          onClick={() => playAudio(w.de)}
+                          title="Talaffuzni eshitish"
+                        >
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                            <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                          </svg>
+                        </button>
+                        <span style={{ fontFamily: "'Playfair Display',serif", fontSize: 16, fontWeight: 700 }}>{w.de}</span>
+                      </div>
+                      <span style={{ fontSize: 13, color: "var(--text-muted)", textAlign: "right", marginLeft: 12 }}>{w.uz}</span>
                     </div>
                   ))
                 }

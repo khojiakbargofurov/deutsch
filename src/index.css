@@ -476,10 +476,169 @@ body.light-theme .flash-back { background: #eef9f2; }
 
 /* Small mobile (≤400px) */
 @media (max-width: 400px) {
-  .btn-y { font-size: 13px; }
   .qopt { font-size: 12px; }
   .score-ring { width: 88px; height: 88px; }
   .inner-pad { padding: 18px 12px 60px !important; }
   .chip { padding: 4px 9px; font-size: 10px; }
   .quiz-stats { gap: 10px; }
 }
+
+/* ── AUDIO SPEAKER BUTTON ── */
+.speaker-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--opt-letter-bg);
+  border: 1px solid var(--border-color);
+  color: var(--color);
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  flex-shrink: 0;
+}
+.speaker-btn:hover {
+  background: var(--hover-bg);
+  border-color: #f4d03f;
+  color: #f4d03f;
+  transform: scale(1.1);
+}
+.speaker-btn.playing {
+  background: rgba(244, 208, 63, 0.15);
+  border-color: #f4d03f;
+  color: #f4d03f;
+  animation: pulse-wave 1.2s infinite ease-in-out;
+}
+@keyframes pulse-wave {
+  0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(244, 208, 63, 0.4); }
+  50% { transform: scale(1.08); box-shadow: 0 0 0 6px rgba(244, 208, 63, 0); }
+  100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(244, 208, 63, 0); }
+}
+
+/* ── TELEGRAM PROMO CARD ── */
+.tg-promo-card {
+  position: relative;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 24px;
+  padding: 32px 28px;
+  margin-top: 50px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  transition: all 0.3s ease;
+  text-align: left;
+}
+.tg-promo-card:hover {
+  border-color: rgba(0, 136, 204, 0.4);
+  box-shadow: 0 15px 40px rgba(0, 136, 204, 0.15);
+  transform: translateY(-2px);
+}
+.tg-promo-card::before {
+  content: "";
+  position: absolute;
+  top: -150px;
+  right: -150px;
+  width: 300px;
+  height: 300px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(0, 136, 204, 0.08) 0%, rgba(0,0,0,0) 70%);
+  pointer-events: none;
+}
+.tg-promo-icon-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
+  background: rgba(0, 136, 204, 0.1);
+  color: #0088cc;
+  margin-bottom: 20px;
+  font-size: 24px;
+}
+.tg-features-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin: 24px 0 28px;
+}
+.tg-feature-item {
+  background: rgba(255,255,255,0.01);
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+  padding: 16px 12px;
+  text-align: center;
+  transition: all 0.2s ease;
+}
+.tg-feature-item:hover {
+  background: var(--hover-bg);
+  border-color: var(--card-border);
+}
+.tg-feature-emoji {
+  font-size: 20px;
+  margin-bottom: 8px;
+  display: block;
+}
+.tg-feature-title {
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+.tg-feature-desc {
+  font-size: 11px;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+.btn-tg {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: linear-gradient(135deg, #0088cc, #00a8ff);
+  color: #ffffff !important;
+  font-weight: 600;
+  font-size: 15px;
+  padding: 14px 28px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: 100%;
+  max-width: 280px;
+  box-shadow: 0 4px 15px rgba(0, 136, 204, 0.3);
+  text-decoration: none;
+}
+.btn-tg:hover {
+  background: linear-gradient(135deg, #00a8ff, #0088cc);
+  box-shadow: 0 6px 20px rgba(0, 136, 204, 0.4);
+  transform: translateY(-1px);
+}
+.btn-tg:active {
+  transform: none;
+}
+
+/* Light theme support override for TG promo */
+body.light-theme .tg-promo-card {
+  box-shadow: 0 10px 30px rgba(0, 136, 204, 0.04);
+}
+body.light-theme .tg-promo-card:hover {
+  border-color: rgba(0, 136, 204, 0.3);
+  box-shadow: 0 15px 40px rgba(0, 136, 204, 0.08);
+}
+body.light-theme .tg-feature-item {
+  background: rgba(0, 0, 0, 0.01);
+}
+
+@media (max-width: 600px) {
+  .tg-features-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  .tg-promo-card {
+    padding: 24px 20px;
+  }
+  .btn-tg {
+    max-width: 100%;
+  }
+}
+
