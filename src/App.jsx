@@ -165,15 +165,16 @@ function shuffle(arr) {
 }
 
 // Build 20 unique questions — each word used AT MOST once
-function buildQuiz(category) {
-  // pool: unique items with cat tag
+function buildQuiz(category, favorites = []) {
   const pool = category === "all"
     ? Object.entries(VOCAB).flatMap(([cat, ws]) => ws.map(w => ({ ...w, cat })))
-    : VOCAB[category].map(w => ({ ...w, cat: category }));
+    : category === "favorites"
+      ? Object.entries(VOCAB).flatMap(([cat, ws]) => ws.map(w => ({ ...w, cat }))).filter(w => favorites.includes(w.de))
+      : VOCAB[category].map(w => ({ ...w, cat: category }));
 
   const shuffled = shuffle(pool);
   const selected = shuffled.slice(0, Math.min(20, shuffled.length));
-  const fullPool = pool; // for distractors
+  const fullPool = Object.entries(VOCAB).flatMap(([cat, ws]) => ws.map(w => ({ ...w, cat })));
 
   return selected.map(word => {
     const distractors = shuffle(fullPool.filter(w => w.de !== word.de)).slice(0, 3);
@@ -213,6 +214,8 @@ const NAV_ITEMS = [
   { id: "vocab", label: "Lug'at" },
   { id: "quizSetup", label: "Quiz" },
   { id: "matchSetup", label: "So'z Top" },
+  { id: "stats", label: "Natijalar" },
+  { id: "spellingSetup", label: "Yozish" },
 ];
 
 /* ═══════════════════════════════════════
@@ -272,7 +275,68 @@ export default function App() {
   const [flashIdx, setFlashIdx] = useState(0);
   const [flipped, setFlipped] = useState(false);
 
-  // matching game states
+  // Favorites states
+  const [favorites, setFavorites] = useState(() => {
+    try {
+      const saved = localStorage.getItem("favorites");
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  useEffect(() => {
+    localStorage.setItem("favorites", JSON.stringify(favorites));
+  }, [favorites]);
+
+  const toggleFavorite = useCallback((deWord) => {
+    setFavorites(prev => {
+      if (prev.includes(deWord)) return prev.filter(w => w !== deWord);
+      return [...prev, deWord];
+    });
+  }, []);
+
+  // Statistics states
+  const [quizHistory, setQuizHistory] = useState(() => {
+    try {
+      const saved = localStorage.getItem("quizHistory");
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  const [learntWords, setLearntWords] = useState(() => {
+    try {
+      const saved = localStorage.getItem("learntWords");
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  const [fastestMatch, setFastestMatch] = useState(() => {
+    try {
+      const saved = localStorage.getItem("fastestMatch");
+      return saved ? parseInt(saved, 10) || 999999 : 999999;
+    } catch {
+      return 999999;
+    }
+  });
+
+  useEffect(() => {
+    localStorage.setItem("quizHistory", JSON.stringify(quizHistory));
+  }, [quizHistory]);
+
+  useEffect(() => {
+    localStorage.setItem("learntWords", JSON.stringify(learntWords));
+  }, [learntWords]);
+
+  useEffect(() => {
+    localStorage.setItem("fastestMatch", fastestMatch.toString());
+  }, [fastestMatch]);
+
+  // Matching game states
   const [matchCat, setMatchCat] = useState("all");
   const [matchCards, setMatchCards] = useState([]);
   const [selectedCard, setSelectedCard] = useState(null);
@@ -282,6 +346,18 @@ export default function App() {
   const [matchStartTime, setMatchStartTime] = useState(0);
   const [matchElapsedTime, setMatchElapsedTime] = useState(0);
   const [matchDone, setMatchDone] = useState(false);
+
+  // Spelling practice states
+  const [spellingCat, setSpellingCat] = useState("all");
+  const [spellingQuestions, setSpellingQuestions] = useState([]);
+  const [spellingIdx, setSpellingIdx] = useState(0);
+  const [spellingInput, setSpellingInput] = useState("");
+  const [spellingIsWrong, setSpellingIsWrong] = useState(false);
+  const [spellingCorrectWord, setSpellingCorrectWord] = useState(false);
+  const [spellingAttempts, setSpellingAttempts] = useState(0);
+  const [spellingStartTime, setSpellingStartTime] = useState(0);
+  const [spellingElapsedTime, setSpellingElapsedTime] = useState(0);
+  const [spellingDone, setSpellingDone] = useState(false);
 
   const navigate = useCallback((p) => {
     setPage(p); setMenuOpen(false);
@@ -298,10 +374,23 @@ export default function App() {
     return () => clearInterval(timer);
   }, [page, matchDone, matchStartTime]);
 
+  // timer effect for spelling game
+  useEffect(() => {
+    let timer;
+    if (page === "spelling" && !spellingDone) {
+      timer = setInterval(() => {
+        setSpellingElapsedTime(Math.floor((Date.now() - spellingStartTime) / 1000));
+      }, 1000);
+    }
+    return () => clearInterval(timer);
+  }, [page, spellingDone, spellingStartTime]);
+
   const startMatchingGame = useCallback(() => {
     const pool = matchCat === "all"
       ? Object.entries(VOCAB).flatMap(([cat, ws]) => ws.map(w => ({ ...w, cat })))
-      : VOCAB[matchCat].map(w => ({ ...w, cat: matchCat }));
+      : matchCat === "favorites"
+        ? Object.entries(VOCAB).flatMap(([cat, ws]) => ws.map(w => ({ ...w, cat }))).filter(w => favorites.includes(w.de))
+        : VOCAB[matchCat].map(w => ({ ...w, cat: matchCat }));
 
     const shuffled = shuffle(pool).slice(0, 5);
     
@@ -330,7 +419,7 @@ export default function App() {
     setMatchElapsedTime(0);
     setMatchDone(false);
     setPage("match");
-  }, [matchCat]);
+  }, [matchCat, favorites]);
 
   const handleCardClick = (card) => {
     if (matchedIds.includes(card.id) || wrongCardId) return;
@@ -352,6 +441,8 @@ export default function App() {
 
       if (newMatched.length === 10) {
         setMatchDone(true);
+        const seconds = Math.floor((Date.now() - matchStartTime) / 1000);
+        setFastestMatch(prev => Math.min(prev, seconds));
       }
     } else {
       setWrongCardId(card.id);
@@ -364,6 +455,72 @@ export default function App() {
     }
   };
 
+  const startSpellingGame = useCallback(() => {
+    const pool = spellingCat === "all"
+      ? Object.entries(VOCAB).flatMap(([cat, ws]) => ws.map(w => ({ ...w, cat })))
+      : spellingCat === "favorites"
+        ? Object.entries(VOCAB).flatMap(([cat, ws]) => ws.map(w => ({ ...w, cat }))).filter(w => favorites.includes(w.de))
+        : VOCAB[spellingCat].map(w => ({ ...w, cat: spellingCat }));
+
+    const shuffled = shuffle(pool).slice(0, 10);
+    setSpellingQuestions(shuffled);
+    setSpellingIdx(0);
+    setSpellingInput("");
+    setSpellingIsWrong(false);
+    setSpellingCorrectWord(false);
+    setSpellingAttempts(0);
+    setSpellingStartTime(Date.now());
+    setSpellingElapsedTime(0);
+    setSpellingDone(false);
+    setPage("spelling");
+  }, [spellingCat, favorites]);
+
+  const handleSpellingChange = (e) => {
+    const val = e.target.value;
+    setSpellingInput(val);
+    setSpellingIsWrong(false);
+
+    const correct = spellingQuestions[spellingIdx]?.de || "";
+    if (val.trim().toLowerCase() === correct.toLowerCase()) {
+      setSpellingCorrectWord(true);
+      setTimeout(() => {
+        if (spellingIdx + 1 >= spellingQuestions.length) {
+          setSpellingDone(true);
+        } else {
+          setSpellingIdx(i => i + 1);
+          setSpellingInput("");
+          setSpellingCorrectWord(false);
+        }
+      }, 800);
+    } else if (val.length > 0 && !correct.toLowerCase().startsWith(val.toLowerCase())) {
+      setSpellingIsWrong(true);
+      setSpellingAttempts(a => a + 1);
+    }
+  };
+
+  const handleUmlautClick = (char) => {
+    const val = spellingInput + char;
+    setSpellingInput(val);
+    setSpellingIsWrong(false);
+
+    const correct = spellingQuestions[spellingIdx]?.de || "";
+    if (val.trim().toLowerCase() === correct.toLowerCase()) {
+      setSpellingCorrectWord(true);
+      setTimeout(() => {
+        if (spellingIdx + 1 >= spellingQuestions.length) {
+          setSpellingDone(true);
+        } else {
+          setSpellingIdx(i => i + 1);
+          setSpellingInput("");
+          setSpellingCorrectWord(false);
+        }
+      }, 800);
+    } else if (!correct.toLowerCase().startsWith(val.toLowerCase())) {
+      setSpellingIsWrong(true);
+      setSpellingAttempts(a => a + 1);
+    }
+  };
+
   const formatTime = (seconds) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
@@ -371,11 +528,11 @@ export default function App() {
   };
 
   const startQuiz = useCallback(() => {
-    const qs = buildQuiz(quizCat);
+    const qs = buildQuiz(quizCat, favorites);
     setQuestions(qs);
     setQIdx(0); setChosen(null); setScore(0); setDone(false);
     setPage("quiz");
-  }, [quizCat]);
+  }, [quizCat, favorites]);
 
   const pick = (opt) => {
     if (chosen) return;
@@ -384,11 +541,18 @@ export default function App() {
   };
 
   const next = () => {
-    if (qIdx + 1 >= questions.length) { setDone(true); }
+    if (qIdx + 1 >= questions.length) {
+      setDone(true);
+      const finalScore = score + (chosen?.de === questions[qIdx].word.de ? 1 : 0);
+      setQuizHistory(prev => [...prev, { score: finalScore, total: questions.length, date: new Date().toLocaleDateString("uz-UZ") }].slice(-8));
+    }
     else { setQIdx(i => i + 1); setChosen(null); }
   };
 
-  const filtered = (VOCAB[vocabCat] || []).filter(w =>
+  const filtered = (vocabCat === "favorites"
+    ? Object.entries(VOCAB).flatMap(([cat, ws]) => ws.map(w => ({ ...w, cat }))).filter(w => favorites.includes(w.de))
+    : VOCAB[vocabCat] || []
+  ).filter(w =>
     w.de.toLowerCase().includes(vocabSearch.toLowerCase()) ||
     w.uz.toLowerCase().includes(vocabSearch.toLowerCase())
   );
@@ -592,67 +756,116 @@ export default function App() {
                 {m.label} <span style={{ opacity: .6 }}>({VOCAB[cat].length})</span>
               </button>
             ))}
+            <button 
+              className={`chip ${vocabCat === "favorites" ? "chip-act" : ""}`}
+              style={vocabCat === "favorites" ? { background: "#f1c40f", borderColor: "#f1c40f", color: "#0d0d0d", fontWeight: 600 } : {}}
+              onClick={() => { setVocabCat("favorites"); setFlashIdx(0); setFlipped(false); setVocabSearch(""); }}
+            >
+              🌟 Tanlanganlar <span style={{ opacity: .6 }}>({favorites.length})</span>
+            </button>
           </div>
 
           {/* FLASHCARD MODE */}
           {flash ? (
-            <div>
-              <div style={{ textAlign: "center", fontSize: 13, color: "#555", marginBottom: 16 }}>
-                {flashIdx + 1} / {filtered.length} — kartani bosib ag'dar
+            filtered.length === 0 ? (
+              <div style={{ padding: 40, textAlign: "center", color: "var(--text-muted)", background: "var(--card-bg)", border: "1px solid var(--border-color)", borderRadius: 18 }}>
+                Fleshkarta o'ynash uchun kamida 1 ta so'zni tanlanganlar ⭐ ro'yxatiga qo'shing!
               </div>
-              <div className="flash-wrap" onClick={() => setFlipped(f => !f)}>
-                <div className={`flash-inner ${flipped ? "flipped" : ""}`}>
-                  <div className="flash-face flash-front">
-                    <div style={{ display: "flex", justifyContent: "space-between", width: "100%", alignItems: "center", marginBottom: 10, padding: "0 10px" }}>
-                      <span style={{ fontSize: 11, color: "var(--text-muted)", letterSpacing: 1.5, textTransform: "uppercase" }}>Nemischa</span>
-                      <button 
-                        className={`speaker-btn ${playingWord === filtered[flashIdx]?.de ? "playing" : ""}`}
-                        onClick={(e) => { e.stopPropagation(); playAudio(filtered[flashIdx]?.de); }}
-                        title="Talaffuzni eshitish"
-                      >
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                          <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
-                          <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
-                        </svg>
-                      </button>
+            ) : (
+              <div>
+                <div style={{ textAlign: "center", fontSize: 13, color: "#555", marginBottom: 16 }}>
+                  {flashIdx + 1} / {filtered.length} — kartani bosib ag'dar
+                </div>
+                <div className="flash-wrap" onClick={() => setFlipped(f => !f)}>
+                  <div className={`flash-inner ${flipped ? "flipped" : ""}`}>
+                    <div className="flash-face flash-front">
+                      <div style={{ display: "flex", justifyContent: "space-between", width: "100%", alignItems: "center", marginBottom: 10, padding: "0 10px" }}>
+                        <span style={{ fontSize: 11, color: "var(--text-muted)", letterSpacing: 1.5, textTransform: "uppercase" }}>Nemischa</span>
+                        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                          <button 
+                            className={`speaker-btn ${playingWord === filtered[flashIdx]?.de ? "playing" : ""}`}
+                            onClick={(e) => { e.stopPropagation(); playAudio(filtered[flashIdx]?.de); }}
+                            title="Talaffuzni eshitish"
+                          >
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                              <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                            </svg>
+                          </button>
+                          
+                          <button 
+                            className={`fav-btn ${favorites.includes(filtered[flashIdx]?.de) ? "active" : ""}`}
+                            onClick={(e) => { e.stopPropagation(); toggleFavorite(filtered[flashIdx]?.de); }}
+                            title={favorites.includes(filtered[flashIdx]?.de) ? "Tanlanganlardan o'chirish" : "Tanlanganlarga qo'shish"}
+                          >
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill={favorites.includes(filtered[flashIdx]?.de) ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                            </svg>
+                          </button>
+                        </div>
+                      </div>
+                      <div style={{ fontFamily: "'Playfair Display',serif", fontSize: "clamp(26px,6vw,38px)", fontWeight: 900, margin: "16px 0" }}>{filtered[flashIdx]?.de}</div>
+                      <div style={{ fontSize: 12, color: "var(--text-light)", marginTop: 12 }}>bosib o'zbek tiliga o'gir →</div>
                     </div>
-                    <div style={{ fontFamily: "'Playfair Display',serif", fontSize: "clamp(26px,6vw,38px)", fontWeight: 900, margin: "16px 0" }}>{filtered[flashIdx]?.de}</div>
-                    <div style={{ fontSize: 12, color: "var(--text-light)", marginTop: 12 }}>bosib o'zbek tiliga o'gir →</div>
-                  </div>
-                  <div className="flash-face flash-back">
-                    <div style={{ fontSize: 11, color: "#2ecc71", letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 12 }}>O'zbekcha</div>
-                    <div style={{ fontFamily: "'Playfair Display',serif", fontSize: "clamp(22px,5vw,32px)", fontWeight: 700, color: "#2ecc71" }}>{filtered[flashIdx]?.uz}</div>
+                    <div className="flash-face flash-back">
+                      <div style={{ fontSize: 11, color: "#2ecc71", letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 12 }}>O'zbekcha</div>
+                      <div style={{ fontFamily: "'Playfair Display',serif", fontSize: "clamp(22px,5vw,32px)", fontWeight: 700, color: "#2ecc71" }}>{filtered[flashIdx]?.uz}</div>
+                    </div>
                   </div>
                 </div>
+                <div style={{ display: "flex", gap: 12, justifyContent: "center", marginTop: 20, flexWrap: "wrap", width: "100%" }}>
+                  <button className="btn-o" style={{ flex: 1, minWidth: 100, textAlign: "center" }}
+                    onClick={() => { setFlashIdx(i => Math.max(0, i - 1)); setFlipped(false); }}>‹ Oldingi</button>
+                  <button className="btn-o"
+                    onClick={() => {
+                      const deWord = filtered[flashIdx]?.de;
+                      if (deWord && !learntWords.includes(deWord)) {
+                        setLearntWords(prev => [...prev, deWord]);
+                      }
+                      if (flashIdx + 1 < filtered.length) {
+                        setFlashIdx(i => i + 1);
+                        setFlipped(false);
+                      }
+                    }}
+                    style={{ background: "#2ecc71", color: "white", borderColor: "#2ecc71", flex: 2, minWidth: 160, textAlign: "center", fontWeight: "600" }}
+                  >
+                    ✅ Yodladim & Keyingi
+                  </button>
+                  <button className="btn-o" style={{ flex: 1, minWidth: 100, textAlign: "center" }}
+                    onClick={() => { if (flashIdx + 1 < filtered.length) { setFlashIdx(i => i + 1); setFlipped(false); } }}>Keyingi ›</button>
+                </div>
               </div>
-              <div style={{ display: "flex", gap: 12, justifyContent: "center", marginTop: 20 }}>
-                <button className="btn-o"
-                  onClick={() => { setFlashIdx(i => Math.max(0, i - 1)); setFlipped(false); }}>‹ Oldingi</button>
-                <button className="btn-o act"
-                  onClick={() => { setFlashIdx(i => Math.min(filtered.length - 1, i + 1)); setFlipped(false); }}>Keyingi ›</button>
-              </div>
-            </div>
+            )
           ) : (
             <>
               <input className="search-inp" placeholder="Qidirish: nemischa yoki o'zbekcha..."
                 value={vocabSearch} onChange={e => setVocabSearch(e.target.value)}
                 style={{ marginBottom: 16 }} />
-              <div style={{ border: "1px solid #1a1a1a", borderRadius: 16, overflow: "hidden" }}>
+              <div style={{ border: "1px solid var(--border-color)", borderRadius: 16, overflow: "hidden" }}>
                 <div style={{
-                  background: CAT_META[vocabCat].bg, padding: "10px 18px",
+                  background: vocabCat === "favorites" ? "rgba(241, 196, 15, 0.08)" : (CAT_META[vocabCat]?.bg || "rgba(255,255,255,0.02)"),
+                  padding: "10px 18px",
                   display: "flex", justifyContent: "space-between", alignItems: "center"
                 }}>
                   <span style={{
-                    fontSize: 12, color: CAT_META[vocabCat].accent, fontWeight: 600,
+                    fontSize: 12, 
+                    color: vocabCat === "favorites" ? "#f1c40f" : (CAT_META[vocabCat]?.accent || "var(--color)"), 
+                    fontWeight: 600,
                     letterSpacing: 1.2, textTransform: "uppercase"
-                  }}>{CAT_META[vocabCat].label}</span>
-                  <span style={{ fontSize: 12, color: "#444" }}>{filtered.length} so'z</span>
+                  }}>
+                    {vocabCat === "favorites" ? "🌟 Tanlanganlar" : (CAT_META[vocabCat]?.label || "")}
+                  </span>
+                  <span style={{ fontSize: 12, color: "var(--text-muted)" }}>{filtered.length} so'z</span>
                 </div>
                 {filtered.length === 0
-                  ? <div style={{ padding: 40, textAlign: "center", color: "#333", fontSize: 14 }}>Hech narsa topilmadi</div>
+                  ? <div style={{ padding: 40, textAlign: "center", color: "var(--text-light)", fontSize: 14 }}>
+                      {vocabCat === "favorites" 
+                        ? "Tanlangan so'zlar hali mavjud emas. So'zlar yonidagi yulduzchani ⭐ bosib saqlang!" 
+                        : "Hech narsa topilmadi"}
+                    </div>
                   : filtered.map((w, i) => (
                     <div key={i} className="vrow" style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                      <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                         <button 
                           className={`speaker-btn ${playingWord === w.de ? "playing" : ""}`}
                           onClick={() => playAudio(w.de)}
@@ -663,7 +876,18 @@ export default function App() {
                             <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
                           </svg>
                         </button>
-                        <span style={{ fontFamily: "'Playfair Display',serif", fontSize: 16, fontWeight: 700 }}>{w.de}</span>
+                        
+                        <button 
+                          className={`fav-btn ${favorites.includes(w.de) ? "active" : ""}`}
+                          onClick={() => toggleFavorite(w.de)}
+                          title={favorites.includes(w.de) ? "Tanlanganlardan o'chirish" : "Tanlanganlarga qo'shish"}
+                        >
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill={favorites.includes(w.de) ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                          </svg>
+                        </button>
+                        
+                        <span style={{ fontFamily: "'Playfair Display',serif", fontSize: 16, fontWeight: 700, marginLeft: 4 }}>{w.de}</span>
                       </div>
                       <span style={{ fontSize: 13, color: "var(--text-muted)", textAlign: "right", marginLeft: 12 }}>{w.uz}</span>
                     </div>
@@ -695,6 +919,13 @@ export default function App() {
                   style={quizCat === cat ? { background: m.accent, borderColor: m.accent, color: "#0d0d0d", fontWeight: 600 } : {}}
                   onClick={() => setQuizCat(cat)}>{m.label} ({VOCAB[cat].length})</button>
               ))}
+              <button 
+                className={`chip ${quizCat === "favorites" ? "chip-act" : ""}`}
+                style={quizCat === "favorites" ? { background: "#f1c40f", borderColor: "#f1c40f", color: "#0d0d0d", fontWeight: 600 } : {}}
+                onClick={() => setQuizCat("favorites")}
+              >
+                🌟 Tanlanganlar ({favorites.length})
+              </button>
             </div>
           </div>
 
@@ -704,8 +935,8 @@ export default function App() {
           }}>
             <div className="quiz-stats">
               {[
-                ["So'zlar", quizCat === "all" ? allCount : VOCAB[quizCat]?.length],
-                ["Savollar", Math.min(20, quizCat === "all" ? allCount : VOCAB[quizCat]?.length)],
+                ["So'zlar", quizCat === "all" ? allCount : quizCat === "favorites" ? favorites.length : VOCAB[quizCat]?.length],
+                ["Savollar", Math.min(20, quizCat === "all" ? allCount : quizCat === "favorites" ? favorites.length : VOCAB[quizCat]?.length)],
                 ["Variantlar", 4],
                 ["Takror", "Yo'q ✓"],
               ].map(([l, v]) => (
@@ -717,10 +948,16 @@ export default function App() {
             </div>
           </div>
 
-          <div style={{ display: "flex", justifyContent: "center" }}>
-            <button className="btn-y" onClick={startQuiz} style={{ fontSize: 16, padding: "14px 24px" }}>
-              Quizni Boshlash →
-            </button>
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 12, width: "100%" }}>
+            {quizCat === "favorites" && favorites.length < 4 ? (
+              <div style={{ color: "#e63946", fontSize: 13, textAlign: "center", width: "100%", padding: "10px", border: "1px solid rgba(230, 57, 70, 0.2)", borderRadius: 10, background: "rgba(230, 57, 70, 0.04)" }}>
+                ⚠️ Quiz boshlash uchun kamida 4 ta so'zni tanlanganlar ⭐ ro'yxatiga qo'shishingiz kerak!
+              </div>
+            ) : (
+              <button className="btn-y" onClick={startQuiz} style={{ fontSize: 16, padding: "14px 24px" }}>
+                Quizni Boshlash →
+              </button>
+            )}
           </div>
         </div>
       )}
@@ -951,6 +1188,317 @@ export default function App() {
                 <button className="btn-y" onClick={startMatchingGame}>🔁 Qayta o'ynash</button>
                 <div style={{ display: "flex", gap: 10 }}>
                   <button className="btn-o" onClick={() => setPage("matchSetup")}>⚙️ Kategoriya</button>
+                  <button className="btn-o" onClick={() => setPage("home")}>🏠 Bosh sahifa</button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ══════════ STATS DASHBOARD ══════════ */}
+      {page === "stats" && (
+        <div style={{ ...S.inner }} className="inner-pad">
+          <div style={{ textAlign: "center", marginBottom: 36 }}>
+            <h2 style={{ fontFamily: "'Playfair Display',serif", fontSize: "clamp(26px,6vw,38px)", fontWeight: 900, marginBottom: 8 }}>
+              Natijalar <span style={{ color: "#f4d03f" }}>Tahlili</span>
+            </h2>
+            <p style={{ fontSize: 14, color: "var(--text-light)", lineHeight: 1.6, maxWidth: 460, margin: "0 auto" }}>
+              Shaxsiy o'zlashtirish ko'rsatkichlari, testlar tarixi va erishilgan yutuqlar.
+            </p>
+          </div>
+
+          {/* Stats Cards Row */}
+          <div className="grid-3" style={{ marginBottom: 32, gap: 12 }}>
+            <div className="home-tile" style={{ padding: "16px 12px", cursor: "default", transform: "none" }}>
+              <div style={{ fontSize: 26, marginBottom: 6 }}>🌟</div>
+              <div style={{ fontFamily: "'Playfair Display',serif", fontSize: 24, fontWeight: 900, color: "#f4d03f" }}>
+                {favorites.length}
+              </div>
+              <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 4 }}>Tanlangan so'zlar</div>
+            </div>
+            
+            <div className="home-tile" style={{ padding: "16px 12px", cursor: "default", transform: "none" }}>
+              <div style={{ fontSize: 26, marginBottom: 6 }}>✅</div>
+              <div style={{ fontFamily: "'Playfair Display',serif", fontSize: 24, fontWeight: 900, color: "#2ecc71" }}>
+                {learntWords.length}
+              </div>
+              <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 4 }}>Yodlangan so'zlar</div>
+            </div>
+
+            <div className="home-tile" style={{ padding: "16px 12px", cursor: "default", transform: "none" }}>
+              <div style={{ fontSize: 26, marginBottom: 6 }}>🧠</div>
+              <div style={{ fontFamily: "'Playfair Display',serif", fontSize: 24, fontWeight: 900, color: "#0088cc" }}>
+                {quizHistory.length}
+              </div>
+              <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 4 }}>O'ynalgan Quizlar</div>
+            </div>
+          </div>
+
+          <div style={{ background: "var(--card-bg)", border: "1px solid var(--border-color)", borderRadius: 18, padding: "24px 20px", marginBottom: 32 }}>
+            <div style={{ fontSize: 11, color: "#f4d03f", letterSpacing: 1.5, textTransform: "uppercase", fontWeight: 600 }}>So'nggi 8 ta test grafigi</div>
+            {quizHistory.length === 0 ? (
+              <div style={{ padding: "40px 0", textAlign: "center", color: "var(--text-muted)", fontSize: 13 }}>
+                Hozircha natijalar mavjud emas. Quiz bo'limida o'zingizni sinab ko'ring!
+              </div>
+            ) : (
+              <div>
+                <div className="chart-container">
+                  {quizHistory.map((h, i) => {
+                    const percentage = (h.score / h.total) * 100;
+                    return (
+                      <div key={i} className="chart-column">
+                        <div className="chart-bar" style={{ height: `${Math.max(8, percentage)}%` }}>
+                          <span className="chart-tooltip">{h.score}/{h.total} ({Math.round(percentage)}%)</span>
+                        </div>
+                        <span className="chart-label">{h.date || `Test ${i + 1}`}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+                <div style={{ textAlign: "center", fontSize: 11, color: "var(--text-muted)", marginTop: 6 }}>
+                  💡 Ustunlar ustiga bosib yoki sichqonchani olib borib aniq natijani ko'rishingiz mumkin.
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Achievements Section */}
+          <div style={{ background: "var(--card-bg)", border: "1px solid var(--border-color)", borderRadius: 18, padding: "24px 20px" }}>
+            <div style={{ fontSize: 11, color: "#f4d03f", letterSpacing: 1.5, textTransform: "uppercase", fontWeight: 600, marginBottom: 12 }}>Erishilgan Yutuqlar</div>
+            <div className="badges-grid">
+              {[
+                {
+                  id: "champion",
+                  icon: "🏆",
+                  title: "Nemischa Chempion",
+                  desc: "Quizda kamida 18 ta to'g'ri javob toping",
+                  unlocked: quizHistory.some(h => h.score >= 18)
+                },
+                {
+                  id: "fast",
+                  icon: "⚡",
+                  title: "Tezkor O'quvchi",
+                  desc: "So'z topish o'yinini 40 soniyadan tezroq yakunlang",
+                  unlocked: fastestMatch <= 40
+                },
+                {
+                  id: "patient",
+                  icon: "📚",
+                  title: "Sabrli Talaba",
+                  desc: "Kamida 5 marotaba Quiz o'ynang",
+                  unlocked: quizHistory.length >= 5
+                },
+                {
+                  id: "collector",
+                  icon: "⭐",
+                  title: "So'z Jamg'aruvchi",
+                  desc: "Tanlanganlar ro'yxatiga 10 tadan ortiq so'z qo'shing",
+                  unlocked: favorites.length >= 10
+                }
+              ].map(b => (
+                <div key={b.id} className={`badge-card ${b.unlocked ? "unlocked" : "locked"}`}>
+                  <div className="badge-icon">{b.icon}</div>
+                  <div className="badge-title">{b.title}</div>
+                  <div className="badge-desc">{b.desc}</div>
+                  <div style={{ fontSize: 10, marginTop: 8, color: b.unlocked ? "#f4d03f" : "var(--text-muted)", fontWeight: 600 }}>
+                    {b.unlocked ? "✓ Bajarildi" : "🔒 Qulflangan"}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ══════════ SPELLING SETUP ══════════ */}
+      {page === "spellingSetup" && (
+        <div style={{ ...S.inner, maxWidth: 520 }} className="inner-pad">
+          <h2 style={{ fontFamily: "'Playfair Display',serif", fontSize: "clamp(24px,6vw,36px)", fontWeight: 900, marginBottom: 6 }}>
+            Yozish <span style={{ color: "#f4d03f" }}>Mashqi</span>
+          </h2>
+          <p style={{ fontSize: 13, color: "var(--text-light)", marginBottom: 32 }}>
+            Harfma-harf to'g'ri yozish orqali so'zlarni xotirada mustahkam saqlang.
+          </p>
+
+          <div style={{ marginBottom: 28 }}>
+            <div style={{ fontSize: 11, color: "#f4d03f", letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 14 }}>Kategoriya tanlang</div>
+            <div className="chips-row">
+              <button className={`chip ${spellingCat === "all" ? "chip-act" : ""}`}
+                style={spellingCat === "all" ? { background: "#f4d03f", borderColor: "#f4d03f", color: "#0d0d0d", fontWeight: 600 } : {}}
+                onClick={() => setSpellingCat("all")}>🌐 Hammasi ({allCount})</button>
+              {Object.entries(CAT_META).map(([cat, m]) => (
+                <button key={cat}
+                  className={`chip ${spellingCat === cat ? "chip-act" : ""}`}
+                  style={spellingCat === cat ? { background: m.accent, borderColor: m.accent, color: "#0d0d0d", fontWeight: 600 } : {}}
+                  onClick={() => setSpellingCat(cat)}>{m.label} ({VOCAB[cat].length})</button>
+              ))}
+              <button 
+                className={`chip ${spellingCat === "favorites" ? "chip-act" : ""}`}
+                style={spellingCat === "favorites" ? { background: "#f1c40f", borderColor: "#f1c40f", color: "#0d0d0d", fontWeight: 600 } : {}}
+                onClick={() => setSpellingCat("favorites")}
+              >
+                🌟 Tanlanganlar ({favorites.length})
+              </button>
+            </div>
+          </div>
+
+          <div style={{
+            background: "#0f0f0f", border: "1px solid #1c1c1c", borderRadius: 16,
+            padding: "20px 22px", marginBottom: 28
+          }}>
+            <div className="quiz-stats">
+              {[
+                ["Turi", spellingCat === "all" ? "Barchasi" : spellingCat === "favorites" ? "Tanlanganlar" : CAT_META[spellingCat]?.label],
+                ["Savollar", Math.min(10, spellingCat === "all" ? allCount : spellingCat === "favorites" ? favorites.length : VOCAB[spellingCat]?.length)],
+                ["Klaviatura", "Maxsus Umlaut"],
+                ["Tekshiruv", "Real-vaqtda"],
+              ].map(([l, v]) => (
+                <div key={l}>
+                  <div style={{ fontFamily: "'Playfair Display',serif", fontSize: 24, fontWeight: 900, color: "#f4d03f" }}>{v}</div>
+                  <div style={{ fontSize: 12, color: "#444" }}>{l}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 12, width: "100%" }}>
+            {spellingCat === "favorites" && favorites.length < 1 ? (
+              <div style={{ color: "#e63946", fontSize: 13, textAlign: "center", width: "100%", padding: "10px", border: "1px solid rgba(230, 57, 70, 0.2)", borderRadius: 10, background: "rgba(230, 57, 70, 0.04)" }}>
+                ⚠️ Yozish mashqini boshlash uchun kamida 1 ta so'zni tanlanganlar ⭐ ro'yxatiga qo'shishingiz kerak!
+              </div>
+            ) : (
+              <button className="btn-y" onClick={startSpellingGame} style={{ fontSize: 16, padding: "14px 24px" }}>
+                ✍️ Mashqni Boshlash →
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* ══════════ SPELLING GAME ══════════ */}
+      {page === "spelling" && (
+        <div style={{ ...S.inner, maxWidth: 580 }} className="inner-pad">
+          {!spellingDone ? (
+            <>
+              {/* Header stats */}
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+                  <span style={{ fontSize: 13, color: "var(--text-muted)" }}>
+                    ⏱️ Vaqt: <strong style={{ color: "var(--color)" }}>{formatTime(spellingElapsedTime)}</strong>
+                  </span>
+                  <span style={{ fontSize: 13, color: "var(--text-muted)" }}>
+                    ❌ Xatolar: <strong style={{ color: "var(--color)" }}>{spellingAttempts}</strong>
+                  </span>
+                </div>
+                <button className="btn-o" onClick={() => setPage("spellingSetup")} style={{ padding: "6px 14px", borderRadius: 8, fontSize: 12 }}>
+                  ⏹️ Chiqish
+                </button>
+              </div>
+
+              {/* Progress bar */}
+              <div className="prog-bar" style={{ marginBottom: 22 }}>
+                <div className="prog-fill" style={{ width: `${(spellingIdx / spellingQuestions.length) * 100}%`, background: "linear-gradient(90deg, #f4d03f, #2ecc71)" }} />
+              </div>
+
+              <div style={{ textAlign: "center", fontSize: 13, color: "var(--text-muted)", marginBottom: 12 }}>
+                Savol: {spellingIdx + 1} / {spellingQuestions.length}
+              </div>
+
+              {/* Question Card */}
+              <div style={{
+                background: "#0f0f0f", border: "1px solid #1c1c1c", borderRadius: 20,
+                padding: "30px 20px", textAlign: "center", marginBottom: 22
+              }}>
+                <div style={{ fontSize: 11, color: "var(--text-muted)", letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 14 }}>
+                  Quyidagi so'zning nemischa tarjimasini yozing:
+                </div>
+                <div style={{
+                  fontFamily: "'Playfair Display',serif",
+                  fontSize: "clamp(26px,6vw,38px)", fontWeight: 900, lineHeight: 1.2, marginBottom: 16
+                }}>
+                  {spellingQuestions[spellingIdx]?.uz}
+                </div>
+                
+                {/* Audio helper */}
+                <div style={{ display: "flex", justifyContent: "center" }}>
+                  <button 
+                    className={`btn-o ${playingWord === spellingQuestions[spellingIdx]?.de ? "playing" : ""}`}
+                    onClick={() => playAudio(spellingQuestions[spellingIdx]?.de)}
+                    style={{ padding: "8px 16px", borderRadius: 20, fontSize: 13, display: "inline-flex", alignItems: "center", gap: 6 }}
+                  >
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                      <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                    </svg>
+                    Talaffuzini eshitish
+                  </button>
+                </div>
+              </div>
+
+              {/* Input Wrap */}
+              <div className="spelling-inp-wrap">
+                <input 
+                  className={`spelling-inp ${spellingCorrectWord ? "correct" : spellingIsWrong ? "incorrect" : ""}`}
+                  placeholder="Nemischa tarjimasini yozing..."
+                  value={spellingInput}
+                  onChange={handleSpellingChange}
+                  autoFocus
+                  autoComplete="off"
+                  autoCorrect="off"
+                  autoCapitalize="off"
+                  spellCheck="false"
+                />
+              </div>
+
+              {/* Virtual Keyboard */}
+              <div className="umlaut-keyboard">
+                {["ä", "ö", "ü", "ß", "Ä", "Ö", "Ü"].map((char) => (
+                  <button 
+                    key={char} 
+                    className="umlaut-btn" 
+                    onClick={() => handleUmlautClick(char)}
+                  >
+                    {char}
+                  </button>
+                ))}
+              </div>
+
+              {/* Feedback messages */}
+              <div style={{ textAlign: "center", marginTop: 10, minHeight: 24 }}>
+                {spellingCorrectWord && <span style={{ color: "#2ecc71", fontSize: 14, fontWeight: 600 }}>🎉 Barakalla! To'g'ri.</span>}
+                {spellingIsWrong && <span style={{ color: "#e63946", fontSize: 13 }}>⚠️ Imlo xatosi bor, diqqat qiling!</span>}
+              </div>
+            </>
+          ) : (
+            /* Victory Screen */
+            <div style={{ textAlign: "center", padding: "20px 0" }}>
+              <h2 style={{ fontFamily: "'Playfair Display',serif", fontSize: "clamp(26px,6vw,38px)", fontWeight: 900, marginBottom: 12 }}>
+                Mashq Tugadi! ✍️🎉
+              </h2>
+              <p style={{ fontSize: 14, color: "var(--text-light)", marginBottom: 32 }}>
+                Barcha so'zlarni muvaffaqiyatli harfma-harf yozib tugatdingiz!
+              </p>
+
+              <div style={{ display: "flex", justifyContent: "center", marginBottom: 36 }}>
+                <div className="score-ring" style={{
+                  borderColor: spellingAttempts === 0 ? "#2ecc71" : spellingAttempts <= 3 ? "#f4d03f" : "#e63946",
+                  background: spellingAttempts === 0 ? "#0d1c10" : spellingAttempts <= 3 ? "#1c1a0d" : "#1c0d0d",
+                  width: 150,
+                  height: 150
+                }}>
+                  <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 4 }}>Ketgan vaqt</div>
+                  <div style={{ fontFamily: "'Playfair Display',serif", fontSize: 26, fontWeight: 900, color: "var(--color)" }}>
+                    {formatTime(spellingElapsedTime)}
+                  </div>
+                  <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 6 }}>{spellingAttempts} ta xato urinish</div>
+                </div>
+              </div>
+
+              <div style={{ display: "flex", flexDirection: "column", gap: 12, alignItems: "center" }}>
+                <button className="btn-y" onClick={startSpellingGame}>🔁 Qayta o'ynash</button>
+                <div style={{ display: "flex", gap: 10 }}>
+                  <button className="btn-o" onClick={() => setPage("spellingSetup")}>⚙️ Kategoriya</button>
                   <button className="btn-o" onClick={() => setPage("home")}>🏠 Bosh sahifa</button>
                 </div>
               </div>
