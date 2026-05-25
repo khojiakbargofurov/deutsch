@@ -951,5 +951,262 @@ body.light-theme .tg-feature-item {
   }
 }
 
+/* ── DUOLINGO STYLE GAMIFICATION ADDITIONS ── */
 
+@keyframes pulse-accent {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(229, 193, 88, 0.4);
+  }
+  70% {
+    transform: scale(1.05);
+    box-shadow: 0 0 0 10px rgba(229, 193, 88, 0);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(229, 193, 88, 0);
+  }
+}
 
+.pulse-active {
+  animation: pulse-accent 2.0s infinite cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.snake-node:hover {
+  transform: scale(1.1) !important;
+  filter: brightness(1.15);
+}
+
+.snake-node:active {
+  transform: scale(0.95) !important;
+}
+
+@keyframes shake-err {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-6px); }
+  40%, 80% { transform: translateX(6px); }
+}
+
+.shake {
+  animation: shake-err 0.4s ease-in-out;
+}
+
+@keyframes slide-up {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+/* Spacer at bottom to prevent footer overlapping elements on mobile */
+@media (max-width: 768px) {
+  body {
+    padding-bottom: 84px !important;
+  }
+}
+
+/* Adjust top padding slightly to prevent status bar visual crowding */
+.inner-pad {
+  padding-top: 24px !important;
+}
+
+/* ── GOLD CROWN THEME OVERRIDES ── */
+body.gold-crown-theme {
+  --accent: #ffd700 !important;
+}
+body.gold-crown-theme.light-theme {
+  --accent: #c09010 !important;
+}
+
+/* ── SPEECH MIC PULSATION ── */
+@keyframes pulse-mic-glow {
+  0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(230, 57, 70, 0.4); }
+  70% { transform: scale(1.1); box-shadow: 0 0 0 15px rgba(230, 57, 70, 0); }
+  100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(230, 57, 70, 0); }
+}
+.pulse-mic {
+  animation: pulse-mic-glow 1.5s infinite ease-in-out;
+}
+
+/* ── SHOP CARD AESTHETICS ── */
+.shop-card {
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.shop-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--accent) !important;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.04);
+}
+
+/* ── CUSTOM TOAST NOTIFICATION STYLES ── */
+@keyframes toast-in {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, -40px, 0) scale(0.9);
+  }
+  70% {
+    opacity: 1;
+    transform: translate3d(0, 8px, 0) scale(1.02);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+.toast-banner.success {
+  background: linear-gradient(135deg, rgba(39, 174, 96, 0.95), rgba(46, 204, 113, 0.9)) !important;
+}
+.toast-banner.error {
+  background: linear-gradient(135deg, rgba(192, 41, 43, 0.95), rgba(230, 57, 70, 0.9)) !important;
+}
+.toast-banner.info {
+  background: linear-gradient(135deg, rgba(0, 136, 204, 0.95), rgba(0, 210, 255, 0.9)) !important;
+}
+
+/* ── RESPONSIVE SIDEBAR NAVIGATION STYLES ── */
+
+/* === Mobile-first defaults === */
+/* Sidebar hidden by default (mobile) */
+.desktop-sidebar-only {
+  display: none !important;
+}
+
+/* Top status bar: shown by default (mobile) */
+.mobile-top-bar {
+  display: flex;
+}
+
+/* Bottom nav: shown by default (mobile) */
+.mobile-bottom-bar {
+  display: flex;
+}
+
+/* === Desktop overrides (≥769px) === */
+@media (min-width: 769px) {
+  /* Show sidebar */
+  .desktop-sidebar-only {
+    display: flex !important;
+  }
+  /* Hide both mobile bars */
+  .mobile-top-bar {
+    display: none !important;
+  }
+  .mobile-bottom-bar {
+    display: none !important;
+  }
+  /* Shift content right of sidebar */
+  .main-content-layout {
+    margin-left: 240px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    transition: margin-left 0.3s ease;
+  }
+  body {
+    padding-bottom: 0 !important;
+  }
+}
+
+/* === Mobile overrides (≤768px) === */
+@media (max-width: 768px) {
+  /* Ensure sidebar stays hidden */
+  .desktop-sidebar-only {
+    display: none !important;
+  }
+  /* Ensure bars stay visible */
+  .mobile-top-bar {
+    display: flex !important;
+  }
+  .mobile-bottom-bar {
+    display: flex !important;
+  }
+  /* Reset content layout */
+  .main-content-layout {
+    margin-left: 0 !important;
+    padding-bottom: 0;
+  }
+  /* Space for bottom nav */
+  body {
+    padding-bottom: 76px !important;
+  }
+}
+
+/* Sidebar Button Item Animations */
+.sidebar-btn-item {
+  position: relative;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  outline: none;
+  overflow: hidden;
+}
+
+.sidebar-btn-item::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--accent);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  z-index: 0;
+}
+
+.sidebar-btn-item span,
+.sidebar-btn-item svg {
+  position: relative;
+  z-index: 1;
+}
+
+.sidebar-btn-item:hover {
+  background: var(--hover-bg) !important;
+  color: var(--accent) !important;
+  transform: translateX(4px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+}
+
+.sidebar-btn-item.active {
+  background: var(--hover-bg) !important;
+  color: var(--accent) !important;
+  box-shadow: inset 0 0 0 1px var(--card-border);
+}
+
+/* Glow crowns inside sidebar */
+body.gold-crown-theme .sidebar-btn-item.active {
+  background: rgba(255, 215, 0, 0.02) !important;
+  color: #ffd700 !important;
+}
+
+/* Soft transition of icons inside sidebar */
+.sidebar-btn-item svg {
+  transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.sidebar-btn-item:hover svg {
+  transform: scale(1.1) rotate(4deg);
+}
+
+/* ── CONFETTI FALLING KEYFRAMES ── */
+@keyframes confetti-fall {
+  0% {
+    transform: translateY(-20px) rotate(0deg);
+  }
+  100% {
+    transform: translateY(100vh) rotate(360deg);
+  }
+}
+
+.confetti-particle {
+  will-change: transform;
+}

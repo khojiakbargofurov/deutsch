@@ -150,3 +150,170 @@ export const CAT_META = {
   Adjektive: { label: "Sifatlar", accent: "#2ecc71", bg: "rgba(46, 204, 113, 0.08)" },
   Adverbien: { label: "Ravishlar", accent: "#3498db", bg: "rgba(52, 152, 219, 0.08)" },
 };
+
+export const LEVELS = [
+  // Unit 1: Fe'llar
+  {
+    id: 1,
+    unit: 1,
+    unitTitle: "1-Bosqich: Harakat Fe'llari",
+    title: "Asosiy Fe'llar",
+    desc: "Kundalik eng muhim nemischa harakat fe'llarini o'rganing.",
+    category: "Verben",
+    words: ["sein", "haben", "machen", "sagen", "gehen", "kommen", "sehen", "geben", "stehen", "finden"],
+    sentence: { de: "Ich gehe nach Hause", uz: "Men uyga ketyapman" }
+  },
+  {
+    id: 2,
+    unit: 1,
+    unitTitle: "1-Bosqich: Harakat Fe'llari",
+    title: "Kundalik Hayot",
+    desc: "Yemoq, ichmoq, o'qish va yozishga oid fe'llar.",
+    category: "Verben",
+    words: ["leben", "essen", "trinken", "schreiben", "lesen", "arbeiten", "schlafen", "wohnen", "heißen", "kaufen"],
+    sentence: { de: "Wir essen heute Brot", uz: "Biz bugun non yeyapmiz" }
+  },
+  {
+    id: 3,
+    unit: 1,
+    unitTitle: "1-Bosqich: Harakat Fe'llari",
+    title: "Muloqot va O'yin",
+    desc: "Yordam so'rash, o'ylash va so'zlashish fe'llari.",
+    category: "Verben",
+    words: ["wissen", "denken", "sprechen", "fragen", "antworten", "spielen", "brauchen", "suchen", "zeigen", "helfen"],
+    sentence: { de: "Kannst du mir helfen", uz: "Menga yordam bera olasanmi" }
+  },
+  {
+    id: 4,
+    unit: 1,
+    unitTitle: "1-Bosqich: Harakat Fe'llari",
+    title: "Modal va Murakkab Fe'llar",
+    desc: "Qila olmoq, ruxsat olmoq va ketmoq kabi fe'llar.",
+    category: "Verben",
+    words: ["können", "müssen", "wollen", "dürfen", "werden", "bleiben", "liegen", "nehmen", "bringen", "fahren"],
+    sentence: { de: "Ich muss Deutsch lernen", uz: "Men nemis tilini o'rganishim kerak" }
+  },
+  // Unit 2: Otlar
+  {
+    id: 5,
+    unit: 2,
+    unitTitle: "2-Bosqich: Otlar va Mavjudlik",
+    title: "Inson va Oila",
+    desc: "Oila a'zolari va shaxslarga doir otlar.",
+    category: "Nomen",
+    words: ["der Mensch", "die Frau", "der Mann", "das Kind", "der Vater", "die Mutter", "der Bruder", "die Schwester", "der Sohn", "die Tochter"],
+    sentence: { de: "Meine Familie ist groß", uz: "Mening oilam katta" }
+  },
+  {
+    id: 6,
+    unit: 2,
+    unitTitle: "2-Bosqich: Otlar va Mavjudlik",
+    title: "Uy va Jihozlar",
+    desc: "Turar joy va xona ichidagi asosiy jihozlar.",
+    category: "Nomen",
+    words: ["das Haus", "die Wohnung", "das Zimmer", "die Tür", "das Fenster", "der Tisch", "der Stuhl", "das Bett", "das Sofa", "der Schrank"],
+    sentence: { de: "Das Haus ist schön", uz: "Uy chiroyli" }
+  },
+  {
+    id: 7,
+    unit: 2,
+    unitTitle: "2-Bosqich: Otlar va Mavjudlik",
+    title: "Yegulik va Ichimliklar",
+    desc: "Meva-sabzavotlar va turli taom nomlari.",
+    category: "Nomen",
+    words: ["das Essen", "das Brot", "das Wasser", "der Kaffee", "der Tee", "das Fleisch", "das Gemüse", "das Obst", "der Apfel", "die Banane"],
+    sentence: { de: "Ich trinke kalten Tee", uz: "Men sovuq choy ichaman" }
+  },
+  {
+    id: 8,
+    unit: 2,
+    unitTitle: "2-Bosqich: Otlar va Mavjudlik",
+    title: "Maktab va Jamiyat",
+    desc: "Ta'lim, transport va vaqtga oid muhim otlar.",
+    category: "Nomen",
+    words: ["die Schule", "die Universität", "der Lehrer", "der Schüler", "die Sprache", "das Wort", "der Satz", "das Buch", "das Auto", "der Zug"],
+    sentence: { de: "Das Buch ist interessant", uz: "Kitob qiziqarli" }
+  },
+  // Unit 3: Sifatlar
+  {
+    id: 9,
+    unit: 3,
+    unitTitle: "3-Bosqich: Sifatlar va Ta'riflar",
+    title: "Hajm va Asosiy Sifatlar",
+    desc: "Narsalarni tavsiflash uchun eng kerakli sifatlar.",
+    category: "Adjektive",
+    words: ["gut", "schlecht", "groß", "klein", "lang", "kurz", "schön", "hässlich", "neu", "alt"],
+    sentence: { de: "Der Mann ist alt", uz: "Erkak kishi qari" }
+  },
+  {
+    id: 10,
+    unit: 3,
+    unitTitle: "3-Bosqich: Sifatlar va Ta'riflar",
+    title: "Holat va Harorat",
+    desc: "Issiq-sovuq, tezkorlik va narx-navoga doir sifatlar.",
+    category: "Adjektive",
+    words: ["kalt", "warm", "heiß", "teuer", "billig", "schnell", "langsam", "leicht", "schwer", "modern"],
+    sentence: { de: "Das Auto fährt schnell", uz: "Mashina tez yuradi" }
+  },
+  {
+    id: 11,
+    unit: 3,
+    unitTitle: "3-Bosqich: Sifatlar va Ta'riflar",
+    title: "Hissiyot va Qulaylik",
+    desc: "Tozalik, mazalilik va inson kayfiyatlari.",
+    category: "Adjektive",
+    words: ["sauber", "schmutzig", "süß", "sauer", "lecker", "froh", "traurig", "müde", "wach", "nett"],
+    sentence: { de: "Ich bin sehr müde", uz: "Men juda charchaganman" }
+  },
+  {
+    id: 12,
+    unit: 3,
+    unitTitle: "3-Bosqich: Sifatlar va Ta'riflar",
+    title: "Mantiqiy Belgilar",
+    desc: "Muhimlik, oson-qiyinlik va xavfsizlik belgilari.",
+    category: "Adjektive",
+    words: ["wichtig", "einfach", "schwierig", "interessant", "langweilig", "möglich", "unmöglich", "gesund", "krank", "sicher"],
+    sentence: { de: "Deutsch ist nicht schwierig", uz: "Nemis tili qiyin emas" }
+  },
+  // Unit 4: Ravishlar
+  {
+    id: 13,
+    unit: 4,
+    unitTitle: "4-Bosqich: Ravishlar va Vaqt",
+    title: "Vaqt Ravishlari",
+    desc: "Harakatlar qachon sodir bo'lishini ko'rsatuvchi ravishlar.",
+    category: "Adverbien",
+    words: ["jetzt", "heute", "morgen", "gestern", "immer", "nie", "manchmal", "oft", "selten", "bald"],
+    sentence: { de: "Ich lerne heute Deutsch", uz: "Men bugun nemis tili o'rganyapman" }
+  },
+  {
+    id: 14,
+    unit: 4,
+    unitTitle: "4-Bosqich: Ravishlar va Vaqt",
+    title: "Makon va Joy",
+    desc: "Qayerda ekanligini ifodalovchi joy ravishlari.",
+    category: "Adverbien",
+    words: ["hier", "dort", "oben", "unten", "drinnen", "draußen", "überall", "nirgendwo", "fast", "sowieso"],
+    sentence: { de: "Es ist warm draußen", uz: "Tashqarida iliq" }
+  },
+  {
+    id: 15,
+    unit: 4,
+    unitTitle: "4-Bosqich: Ravishlar va Vaqt",
+    title: "Miqdor va Taxmin",
+    desc: "Daraja, ehtimollik va ketma-ketlik ravishlari.",
+    category: "Adverbien",
+    words: ["vielleicht", "leider", "gern", "sehr", "auch", "schon", "noch", "dann", "danach", "davor"],
+    sentence: { de: "Ich trinke sehr gern Kaffee", uz: "Men qahvani juda mamnuniyat bilan ichaman" }
+  },
+  {
+    id: 16,
+    unit: 4,
+    unitTitle: "4-Bosqich: Ravishlar va Vaqt",
+    title: "Tezkorlik va Natija",
+    desc: "Darhol, yana va nihoyat kabi kuchaytiruvchi ravishlar.",
+    category: "Adverbien",
+    words: ["sofort", "gleich", "wieder", "damals", "natürlich", "bestimmt", "endlich", "zumindest", "mindestens", "ansonsten"],
+    sentence: { de: "Wir gewinnen sofort das Spiel", uz: "Biz darhol o'yinni yutamiz" }
+  }
+];
