@@ -2,7 +2,8 @@ import React, { useState, useCallback, useEffect } from "react";
 
 // Data & Helpers
 import { VOCAB, CAT_META } from "./data/vocabData";
-import { shuffle, buildQuiz } from "./utils/helpers";
+import { shuffle, buildQuiz, speakWord, initSpeech } from "./utils/helpers";
+import { ACHIEVEMENTS } from "./data/achievementsData";
 
 // Components
 import Navbar from "./components/Navbar";
@@ -15,6 +16,10 @@ import SpellingGame from "./components/SpellingGame";
 import StatsDashboard from "./components/StatsDashboard";
 import LeagueBoard from "./components/LeagueBoard";
 import Shop from "./components/Shop";
+import Flashcard from "./components/Flashcard";
+import Grammar from "./components/Grammar";
+import Achievements from "./components/Achievements";
+import ConfettiEffect from "./components/ConfettiEffect";
 
 export default function App() {
   const [page, setPage] = useState("home");
@@ -208,15 +213,61 @@ export default function App() {
   }, []);
 
   const [playingWord, setPlayingWord] = useState(null);
+  const [confetti, setConfetti] = useState(false);
+
+  // Flashcard state
+  const [flashcardCategory, setFlashcardCategory] = useState("all");
+
+  // Total gems earned (for achievements)
+  const [totalGemsEarned, setTotalGemsEarned] = useState(() => {
+    try { return parseInt(localStorage.getItem("totalGemsEarned") || "0", 10); } catch { return 0; }
+  });
+
+  // Unlocked achievements
+  const [unlockedAchievements, setUnlockedAchievements] = useState(() => {
+    try { return JSON.parse(localStorage.getItem("unlockedAchievements") || "[]"); } catch { return []; }
+  });
+
+  // Sync new states
+  useEffect(() => { localStorage.setItem("totalGemsEarned", totalGemsEarned.toString()); }, [totalGemsEarned]);
+  useEffect(() => { localStorage.setItem("unlockedAchievements", JSON.stringify(unlockedAchievements)); }, [unlockedAchievements]);
+
+  // Init Web Speech API
+  useEffect(() => { initSpeech(); }, []);
+
+  // Achievement checker
+  useEffect(() => {
+    const stats = {
+      streak,
+      learntWords: learntWords.length,
+      favorites: favorites.length,
+      quizCount: quizHistory.length,
+      perfectQuiz: quizHistory.filter(q => q.score === q.total).length,
+      xp,
+      totalGemsEarned,
+      fastestMatch: fastestMatch === 999999 ? 0 : fastestMatch,
+      completedLevels: completedLevels.length,
+      vipUnlocked,
+    };
+    const newlyUnlocked = ACHIEVEMENTS.filter(
+      a => !unlockedAchievements.includes(a.id) && a.check(stats)
+    );
+    if (newlyUnlocked.length > 0) {
+      newlyUnlocked.forEach(a => showToast(`🏅 Yutuq: ${a.title}!`, "success"));
+      setUnlockedAchievements(prev => [...prev, ...newlyUnlocked.map(a => a.id)]);
+    }
+  }, [streak, learntWords.length, favorites.length, quizHistory.length, xp, totalGemsEarned, fastestMatch, completedLevels.length, vipUnlocked]);
 
   const playAudio = useCallback((word) => {
     if (!word) return;
     setPlayingWord(word);
-    const ttsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(word)}&tl=de&client=tw-ob`;
-    const audio = new Audio(ttsUrl);
-    audio.addEventListener("ended", () => setPlayingWord(null));
-    audio.addEventListener("error", () => setPlayingWord(null));
-    audio.play().catch(() => setPlayingWord(null));
+    speakWord(word, () => setPlayingWord(null));
+  }, []);
+
+  // Track gems earned
+  const trackGems = useCallback((amount) => {
+    setGems(g => g + amount);
+    setTotalGemsEarned(t => t + amount);
   }, []);
 
   // quiz state
@@ -904,8 +955,48 @@ export default function App() {
             streakShields={streakShields}
             vipUnlocked={vipUnlocked}
             goldCrownTheme={goldCrownTheme}
+            navigate={navigate}
+            unlockedAchievements={unlockedAchievements}
           />
         )}
+
+        {page === "flashcard" && (
+          <Flashcard
+            navigate={navigate}
+            category={flashcardCategory}
+            setCategory={setFlashcardCategory}
+            favorites={favorites}
+            showToast={showToast}
+            xp={xp}
+            setXp={setXp}
+            gems={gems}
+            setGems={setGems}
+          />
+        )}
+
+        {page === "grammar" && (
+          <Grammar
+            navigate={navigate}
+            showToast={showToast}
+            xp={xp}
+            setXp={setXp}
+          />
+        )}
+
+        {page === "achievements" && (
+          <Achievements
+            navigate={navigate}
+            unlockedAchievements={unlockedAchievements}
+            stats={{
+              streak, learntWords: learntWords.length, favorites: favorites.length,
+              quizCount: quizHistory.length, xp, totalGemsEarned, fastestMatch,
+              completedLevels: completedLevels.length, vipUnlocked
+            }}
+          />
+        )}
+
+        {/* Global Confetti */}
+        <ConfettiEffect trigger={confetti} onDone={() => setConfetti(false)} />
       </div>
     </div>
   );
