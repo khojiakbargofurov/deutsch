@@ -580,7 +580,7 @@ export default function App() {
     localStorage.setItem("userProfile", JSON.stringify(profile));
     setOnboarded(true);
     localStorage.setItem("onboarded", "true");
-    showToast("Deutsch Blitz-ga xush kelibsiz! 🎉");
+    showToast("Deutsch Blitzi-ga xush kelibsiz! 🎉");
   }, [showToast]);
 
   if (!onboarded) {

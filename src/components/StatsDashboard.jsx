@@ -147,7 +147,7 @@ export default function StatsDashboard({
         </h3>
         
         <p style={{ fontSize: 12, color: "var(--text-muted)", textAlign: "center", marginBottom: 18 }}>
-          {vipUnlocked ? "🎖️ Premium Oltin A'zo" : "Nemis Blitz Platformasi A'zosi"}
+          {vipUnlocked ? "🎖️ Premium Oltin A'zo" : "Nemis Blitzi Platformasi A'zosi"}
         </p>
 
         <div style={{ display: "flex", justifyContent: "center", gap: 10 }}>

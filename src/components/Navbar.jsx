@@ -93,7 +93,7 @@ export default function Navbar({
               letterSpacing: -0.5,
               whiteSpace: "nowrap"
             }}>
-              Deutsch <span style={{ color: "var(--accent)" }}>Blitz</span>
+              Deutsch <span style={{ color: "var(--accent)" }}>Blitzi</span>
               {vipUnlocked && <span style={{ color: "#ffd700", marginLeft: 4 }} title="Oltin VIP A'zo">👑</span>}
             </span>
           </div>
