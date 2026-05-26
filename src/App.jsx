@@ -258,28 +258,7 @@ export default function App() {
   // Init Web Speech API
   useEffect(() => { initSpeech(); }, []);
 
-  // Achievement checker
-  useEffect(() => {
-    const stats = {
-      streak,
-      learntWords: learntWords.length,
-      favorites: favorites.length,
-      quizCount: quizHistory.length,
-      perfectQuiz: quizHistory.filter(q => q.score === q.total).length,
-      xp,
-      totalGemsEarned,
-      fastestMatch: fastestMatch === 999999 ? 0 : fastestMatch,
-      completedLevels: completedLevels.length,
-      vipUnlocked,
-    };
-    const newlyUnlocked = ACHIEVEMENTS.filter(
-      a => !unlockedAchievements.includes(a.id) && a.check(stats)
-    );
-    if (newlyUnlocked.length > 0) {
-      newlyUnlocked.forEach(a => showToast(`🏅 Yutuq: ${a.title}!`, "success"));
-      setUnlockedAchievements(prev => [...prev, ...newlyUnlocked.map(a => a.id)]);
-    }
-  }, [streak, learntWords.length, favorites.length, quizHistory.length, xp, totalGemsEarned, fastestMatch, completedLevels.length, vipUnlocked]);
+
 
   const playAudio = useCallback((word) => {
     if (!word) return;
@@ -394,6 +373,29 @@ export default function App() {
   const [spellingStartTime, setSpellingStartTime] = useState(0);
   const [spellingElapsedTime, setSpellingElapsedTime] = useState(0);
   const [spellingDone, setSpellingDone] = useState(false);
+
+  // Achievement checker
+  useEffect(() => {
+    const stats = {
+      streak,
+      learntWords: learntWords.length,
+      favorites: favorites.length,
+      quizCount: quizHistory.length,
+      perfectQuiz: quizHistory.filter(q => q.score === q.total).length,
+      xp,
+      totalGemsEarned,
+      fastestMatch: fastestMatch === 999999 ? 0 : fastestMatch,
+      completedLevels: completedLevels.length,
+      vipUnlocked,
+    };
+    const newlyUnlocked = ACHIEVEMENTS.filter(
+      a => !unlockedAchievements.includes(a.id) && a.check(stats)
+    );
+    if (newlyUnlocked.length > 0) {
+      newlyUnlocked.forEach(a => showToast(`🏅 Yutuq: ${a.title}!`, "success"));
+      setUnlockedAchievements(prev => [...prev, ...newlyUnlocked.map(a => a.id)]);
+    }
+  }, [streak, learntWords.length, favorites.length, quizHistory.length, xp, totalGemsEarned, fastestMatch, completedLevels.length, vipUnlocked]);
 
   const navigate = useCallback((p) => {
     setPage(p); setMenuOpen(false);
