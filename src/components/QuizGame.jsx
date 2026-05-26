@@ -619,20 +619,20 @@ export default function QuizGame({
               <circle cx="36" cy="64" r="3.5" fill="#ffc107" />
             </svg>
 
-            {/* Waving mascot owl */}
-            <svg width="72" height="72" viewBox="0 0 44 44" fill="none" style={{ filter: "drop-shadow(0 4px 12px rgba(88,204,2,0.2))", animation: "bounce 1.5s infinite" }}>
-              <rect width="44" height="44" rx="14" fill="#58cc02" />
-              {/* Big happy eyes */}
-              <circle cx="14" cy="18" r="7" fill="#fff" />
-              <path d="M11 18 Q14 20 17 18" stroke="#000" strokeWidth="2" strokeLinecap="round" fill="none" />
-              <circle cx="30" cy="18" r="7" fill="#fff" />
-              <path d="M27 18 Q30 20 33 18" stroke="#000" strokeWidth="2" strokeLinecap="round" fill="none" />
-              {/* Beak */}
-              <path d="M18 22 L22 26 L26 22 Z" fill="#ffc107" />
-              {/* Wings waving */}
-              <path d="M4 22 C1 18, 0 14, 2 12" stroke="#58cc02" strokeWidth="4" strokeLinecap="round" />
-              <path d="M40 22 C43 18, 44 14, 42 12" stroke="#58cc02" strokeWidth="4" strokeLinecap="round" />
-            </svg>
+            {/* Waving mascot logo */}
+            <img 
+              src="/logo.png" 
+              alt="Mascot Waving" 
+              style={{
+                width: 72,
+                height: 72,
+                borderRadius: "50%",
+                boxShadow: "0 4px 15px rgba(88,204,2,0.35)",
+                border: "2.5px solid #58cc02",
+                objectFit: "cover",
+                animation: "bounce 1.5s infinite"
+              }} 
+            />
 
           </div>
 

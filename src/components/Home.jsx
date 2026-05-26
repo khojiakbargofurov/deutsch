@@ -5,25 +5,40 @@ import LessonModal from "./LessonModal";
 
 // Inline Custom Premium SVGs for mock alignment
 const MascotOwl = ({ size = 56, hasBell = false }) => (
-  <svg width={size} height={size} viewBox="0 0 44 44" fill="none" style={{ filter: "drop-shadow(0 4px 10px rgba(88,204,2,0.2))" }}>
-    <rect width="44" height="44" rx="14" fill="#58cc02" />
-    <circle cx="14" cy="18" r="7" fill="#fff" />
-    <circle cx="14" cy="18" r="2.5" fill="#000" />
-    <circle cx="30" cy="18" r="7" fill="#fff" />
-    <circle cx="30" cy="18" r="2.5" fill="#000" />
-    <path d="M18 24 L22 29 L26 24 Z" fill="#ffc107" />
-    <circle cx="7" cy="24" r="2" fill="#ff9800" opacity="0.6" />
-    <circle cx="37" cy="24" r="2" fill="#ff9800" opacity="0.6" />
-    <path d="M12 34 Q14 31 16 34" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" />
-    <path d="M22 35 Q24 32 26 35" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" />
-    <path d="M28 34 Q30 31 32 34" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" />
+  <div style={{ position: "relative", width: size, height: size }}>
+    <img 
+      src="/logo.png" 
+      alt="Mascot" 
+      style={{ 
+        width: size, 
+        height: size, 
+        borderRadius: "50%",
+        boxShadow: "0 4px 15px rgba(88,204,2,0.3)",
+        border: "2px solid #58cc02",
+        objectFit: "cover",
+        display: "block"
+      }} 
+    />
     {hasBell && (
-      <g transform="translate(26, 26)">
-        <circle cx="7" cy="7" r="7" fill="#ffc107" />
-        <path d="M7 3 v6 M5 9 h4 M7 11 v1" stroke="#fff" strokeWidth="1.2" strokeLinecap="round" />
-      </g>
+      <div style={{
+        position: "absolute",
+        bottom: -2,
+        right: -2,
+        width: size * 0.45,
+        height: size * 0.45,
+        borderRadius: "50%",
+        background: "#ffd700",
+        border: "1.5px solid #0a0b0d",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        fontSize: size * 0.25,
+        boxShadow: "0 2px 5px rgba(0,0,0,0.2)"
+      }}>
+        🔔
+      </div>
     )}
-  </svg>
+  </div>
 );
 
 const ChestIcon = ({ isUnlocked, isOpened }) => (
