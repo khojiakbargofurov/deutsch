@@ -1,4 +1,4 @@
-const CACHE_NAME = "deutsch-blitz-v1";
+const CACHE_NAME = "deutsch-blitz-v2";
 const STATIC_ASSETS = [
   "/",
   "/index.html",
