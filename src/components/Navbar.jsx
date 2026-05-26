@@ -79,21 +79,23 @@ export default function Navbar({
             }}
           >
             <div style={{
-              width: 28,
-              height: 28,
-              borderRadius: 8,
-              background: "linear-gradient(135deg, #000 33%, #e63946 33% 66%, #e5c158 66%)",
+              fontSize: 26,
+              lineHeight: 1,
               flexShrink: 0,
-              boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)"
-            }} />
+              filter: "drop-shadow(0 2px 8px rgba(88,204,2,0.35))",
+              animation: "bounce 2s infinite"
+            }}>
+              🦉
+            </div>
             <span style={{
               fontFamily: "'Playfair Display', serif",
               fontWeight: 900,
-              fontSize: 18,
+              fontSize: 20,
               letterSpacing: -0.5,
-              whiteSpace: "nowrap"
+              whiteSpace: "nowrap",
+              color: "var(--accent)"
             }}>
-              Deutsch <span style={{ color: "var(--accent)" }}>Blitzi</span>
+              Blitzi
               {vipUnlocked && <span style={{ color: "#ffd700", marginLeft: 4 }} title="Oltin VIP A'zo">👑</span>}
             </span>
           </div>

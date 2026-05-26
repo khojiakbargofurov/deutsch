@@ -70,9 +70,10 @@ export default function Onboarding({ onComplete }) {
             <div style={{ fontSize: 72, marginBottom: 16 }}>🦉</div>
             <div style={{
               fontFamily: "'Playfair Display', serif",
-              fontWeight: 900, fontSize: 28, color: "#58cc02"
+              fontWeight: 900, fontSize: 32, color: "#58cc02",
+              letterSpacing: -0.5
             }}>
-              deutsch<span style={{ color: "#fff" }}>blitzi</span>
+              blitzi
             </div>
             <div style={{ color: "#788290", fontSize: 14, marginTop: 6 }}>
               O'zbekcha · Nemis tili platformasi
