@@ -12,7 +12,7 @@ const MascotOwl = ({ size = 56, hasBell = false }) => (
       style={{ 
         width: size, 
         height: size, 
-        borderRadius: "50%",
+        borderRadius: "16px",
         boxShadow: "0 4px 15px rgba(88,204,2,0.3)",
         border: "2px solid #58cc02",
         objectFit: "cover",

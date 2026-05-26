@@ -84,7 +84,7 @@ export default function Navbar({
               style={{
                 width: 32,
                 height: 32,
-                borderRadius: "50%",
+                borderRadius: "8px",
                 flexShrink: 0,
                 boxShadow: "0 2px 10px rgba(88,204,2,0.25)",
                 border: "1.5px solid var(--accent)",

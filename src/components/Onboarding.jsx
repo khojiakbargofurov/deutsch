@@ -73,7 +73,7 @@ export default function Onboarding({ onComplete }) {
               style={{ 
                 width: 120, 
                 height: 120, 
-                borderRadius: "50%", 
+                borderRadius: "28px", 
                 marginBottom: 16, 
                 boxShadow: "0 8px 30px rgba(88,204,2,0.25)",
                 border: "3px solid #58cc02",

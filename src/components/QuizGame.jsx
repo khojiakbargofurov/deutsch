@@ -626,7 +626,7 @@ export default function QuizGame({
               style={{
                 width: 72,
                 height: 72,
-                borderRadius: "50%",
+                borderRadius: "18px",
                 boxShadow: "0 4px 15px rgba(88,204,2,0.35)",
                 border: "2.5px solid #58cc02",
                 objectFit: "cover",
