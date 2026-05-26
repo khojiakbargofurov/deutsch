@@ -78,15 +78,19 @@ export default function Navbar({
               padding: "0 8px"
             }}
           >
-            <div style={{
-              fontSize: 26,
-              lineHeight: 1,
-              flexShrink: 0,
-              filter: "drop-shadow(0 2px 8px rgba(88,204,2,0.35))",
-              animation: "bounce 2s infinite"
-            }}>
-              🦉
-            </div>
+            <img 
+              src="/logo.png" 
+              alt="Blitzi Logo"
+              style={{
+                width: 32,
+                height: 32,
+                borderRadius: "50%",
+                flexShrink: 0,
+                boxShadow: "0 2px 10px rgba(88,204,2,0.25)",
+                border: "1.5px solid var(--accent)",
+                objectFit: "cover"
+              }} 
+            />
             <span style={{
               fontFamily: "'Playfair Display', serif",
               fontWeight: 900,

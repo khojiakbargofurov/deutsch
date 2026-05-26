@@ -66,8 +66,20 @@ export default function Onboarding({ onComplete }) {
       <div style={outer}>
         <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
           {/* Logo */}
-          <div style={{ marginBottom: 32, textAlign: "center" }}>
-            <div style={{ fontSize: 72, marginBottom: 16 }}>🦉</div>
+          <div style={{ marginBottom: 32, textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center" }}>
+            <img 
+              src="/logo.png" 
+              alt="Blitzi Mascot" 
+              style={{ 
+                width: 120, 
+                height: 120, 
+                borderRadius: "50%", 
+                marginBottom: 16, 
+                boxShadow: "0 8px 30px rgba(88,204,2,0.25)",
+                border: "3px solid #58cc02",
+                objectFit: "cover"
+              }} 
+            />
             <div style={{
               fontFamily: "'Playfair Display', serif",
               fontWeight: 900, fontSize: 32, color: "#58cc02",
