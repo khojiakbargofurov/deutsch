@@ -236,7 +236,7 @@ export const CAT_META = {
   Verben: { icon: "⚡", color: "#e5c158", label: "Fe'llar" },
   Nomen: { icon: "📦", color: "#1cb0f6", label: "Otlar" },
   Adjektive: { icon: "🎨", color: "#a435f0", label: "Sifatlar" },
-  Phrasen: { icon: "💬", color: "#ff9600", label: "Iboralar" },
+  Adverbien: { icon: "💬", color: "#ff9600", label: "Ravishlar" },
   Zahlen: { icon: "🔢", color: "#ff4b4b", label: "Sonlar" },
   Farben: { icon: "🌈", color: "#58cc02", label: "Ranglar" },
   Familie: { icon: "👨‍👩‍👧", color: "#ff6b9d", label: "Oila" },
