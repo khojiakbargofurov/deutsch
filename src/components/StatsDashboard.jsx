@@ -48,6 +48,7 @@ export default function StatsDashboard({
   goldCrownTheme,
   navigate,
   unlockedAchievements = [],
+  mistakes = [],
 }) {
   // Daily Quests states loaded from localStorage
   const [questXP, setQuestXP] = useState(0);
@@ -68,30 +69,32 @@ export default function StatsDashboard({
 
       {/* Quick Nav Buttons */}
       {navigate && (
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10, marginBottom: 24 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8, marginBottom: 24 }}>
           {[
             { icon: "🏅", label: "Yutuqlar", page: "achievements", color: "#ffd700",
               badge: unlockedAchievements.length },
             { icon: "🃏", label: "Flashcard", page: "flashcard", color: "#1cb0f6" },
             { icon: "📝", label: "Grammatika", page: "grammar", color: "#58cc02" },
+            { icon: "❌", label: "Xatolar", page: "mistakes", color: "#ff4b4b",
+              badge: mistakes.length },
           ].map(btn => (
             <button key={btn.page} onClick={() => navigate(btn.page)} style={{
               background: "var(--card-bg)",
               border: `1px solid ${btn.color}30`,
-              borderRadius: 16, padding: "14px 8px",
+              borderRadius: 16, padding: "14px 4px",
               display: "flex", flexDirection: "column", alignItems: "center", gap: 6,
               cursor: "pointer", transition: "all 0.2s ease", position: "relative"
             }}>
               {btn.badge > 0 && (
                 <div style={{
-                  position: "absolute", top: 8, right: 8,
-                  background: btn.color, color: "#000",
-                  borderRadius: 10, fontSize: 10, fontWeight: 900,
+                  position: "absolute", top: 6, right: 6,
+                  background: btn.color, color: btn.color === "#ffd700" ? "#000" : "#fff",
+                  borderRadius: 10, fontSize: 9, fontWeight: 900,
                   padding: "1px 5px", minWidth: 16, textAlign: "center"
                 }}>{btn.badge}</div>
               )}
               <div style={{ fontSize: 24 }}>{btn.icon}</div>
-              <div style={{ fontSize: 11, fontWeight: 700, color: btn.color }}>{btn.label}</div>
+              <div style={{ fontSize: 10, fontWeight: 700, color: btn.color }}>{btn.label}</div>
             </button>
           ))}
         </div>

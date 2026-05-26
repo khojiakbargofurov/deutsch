@@ -20,6 +20,8 @@ import Flashcard from "./components/Flashcard";
 import Grammar from "./components/Grammar";
 import Achievements from "./components/Achievements";
 import ConfettiEffect from "./components/ConfettiEffect";
+import MistakeReview from "./components/MistakeReview";
+import Onboarding from "./components/Onboarding";
 
 export default function App() {
   const [page, setPage] = useState("home");
@@ -34,9 +36,30 @@ export default function App() {
     }
   });
 
-  useEffect(() => {
-    localStorage.setItem("onboarded", onboarded.toString());
-  }, [onboarded]);
+  const [userProfile, setUserProfile] = useState(() => {
+    try { return JSON.parse(localStorage.getItem("userProfile") || "null"); } catch { return null; }
+  });
+
+  // Mistakes state
+  const [mistakes, setMistakes] = useState(() => {
+    try { return JSON.parse(localStorage.getItem("mistakes") || "[]"); } catch { return []; }
+  });
+
+  useEffect(() => { localStorage.setItem("mistakes", JSON.stringify(mistakes)); }, [mistakes]);
+
+  const addMistake = useCallback((word) => {
+    setMistakes(prev => {
+      const existing = prev.find(m => m.de === word.de);
+      if (existing) {
+        return prev.map(m => m.de === word.de ? { ...m, count: (m.count || 1) + 1 } : m);
+      }
+      return [...prev, { ...word, count: 1 }];
+    });
+  }, []);
+
+  const clearMistakes = useCallback(() => {
+    setMistakes([]);
+  }, []);
 
   // Toast Notification States
   const [toasts, setToasts] = useState([]);
@@ -508,6 +531,9 @@ export default function App() {
     } else if (val.length > 0 && !correct.toLowerCase().startsWith(val.toLowerCase())) {
       setSpellingIsWrong(true);
       setSpellingAttempts(a => a + 1);
+      if (spellingQuestions[spellingIdx]) {
+        addMistake(spellingQuestions[spellingIdx]);
+      }
     }
   };
 
@@ -531,6 +557,9 @@ export default function App() {
     } else if (!correct.toLowerCase().startsWith(val.toLowerCase())) {
       setSpellingIsWrong(true);
       setSpellingAttempts(a => a + 1);
+      if (spellingQuestions[spellingIdx]) {
+        addMistake(spellingQuestions[spellingIdx]);
+      }
     }
   };
 
@@ -543,175 +572,17 @@ export default function App() {
 
   const allCount = Object.values(VOCAB).reduce((s, a) => s + a.length, 0);
 
+  const handleOnboardingComplete = useCallback(({ goal, avatar, level }) => {
+    const profile = { goal, avatar, level, xpGoal: goal * 10, name: "Talaba" };
+    setUserProfile(profile);
+    localStorage.setItem("userProfile", JSON.stringify(profile));
+    setOnboarded(true);
+    localStorage.setItem("onboarded", "true");
+    showToast("Deutsch Blitz-ga xush kelibsiz! 🎉");
+  }, [showToast]);
+
   if (!onboarded) {
-    return (
-      <div style={{ 
-        background: "#0a0b0d", 
-        minHeight: "100vh", 
-        color: "#e3e4e6", 
-        fontFamily: "'DM Sans', sans-serif",
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "space-between",
-        padding: "40px 24px",
-        boxSizing: "border-box",
-        maxWidth: 480,
-        margin: "0 auto",
-        textAlign: "center"
-      }}>
-        {/* Brand Header */}
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, marginTop: 20 }}>
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
-            <rect x="2" y="2" width="20" height="20" rx="6" fill="#58cc02" />
-            <circle cx="8" cy="10" r="4" fill="#fff" />
-            <circle cx="8" cy="10" r="1.5" fill="#000" />
-            <circle cx="16" cy="10" r="4" fill="#fff" />
-            <circle cx="16" cy="10" r="1.5" fill="#000" />
-            <path d="M10 14c0 1 1 2 2 2s2-1 2-2H10Z" fill="#ffc107" />
-          </svg>
-          <span style={{
-            fontFamily: "'Playfair Display', serif",
-            fontWeight: 900,
-            fontSize: 22,
-            letterSpacing: -0.5,
-            color: "#58cc02"
-          }}>
-            deutsch<span style={{ color: "#fff" }}>blitz</span>
-          </span>
-        </div>
-
-        {/* Mascot & Friends Circle Illustration */}
-        <div style={{ margin: "40px 0", display: "flex", justifyContent: "center", alignItems: "center", position: "relative" }}>
-          <svg width="260" height="260" viewBox="0 0 200 200" fill="none">
-            <circle cx="100" cy="100" r="95" stroke="rgba(88, 204, 2, 0.04)" strokeWidth="6" strokeDasharray="8 8" />
-            <circle cx="100" cy="100" r="85" fill="rgba(255, 255, 255, 0.01)" stroke="rgba(255,255,255,0.03)" strokeWidth="1" />
-            
-            <circle cx="100" cy="100" r="38" fill="rgba(88, 204, 2, 0.12)" />
-            <g transform="translate(78, 76)">
-              <rect width="44" height="44" rx="14" fill="#58cc02" />
-              <circle cx="14" cy="18" r="7" fill="#fff" />
-              <circle cx="14" cy="18" r="2.5" fill="#000" />
-              <circle cx="30" cy="18" r="7" fill="#fff" />
-              <circle cx="30" cy="18" r="2.5" fill="#000" />
-              <path d="M18 24 L22 29 L26 24 Z" fill="#ffc107" />
-              <circle cx="7" cy="24" r="2" fill="#ff9800" opacity="0.6" />
-              <circle cx="37" cy="24" r="2" fill="#ff9800" opacity="0.6" />
-              <path d="M12 34 Q14 31 16 34" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" />
-              <path d="M22 35 Q24 32 26 35" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" />
-              <path d="M28 34 Q30 31 32 34" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" />
-            </g>
-
-            <circle cx="40" cy="70" r="16" fill="#1cb0f6" />
-            <circle cx="36" cy="68" r="3" fill="#fff" /><circle cx="44" cy="68" r="3" fill="#fff" />
-            <circle cx="36" cy="68" r="1" fill="#000" /><circle cx="44" cy="68" r="1" fill="#000" />
-            <path d="M37 74 Q40 76 43 74" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" />
-            <rect x="34" y="50" width="12" height="5" rx="2" fill="#ff4b4b" />
-
-            <circle cx="160" cy="80" r="18" fill="#a435f0" />
-            <path d="M146 76 C146 64, 174 64, 174 76" fill="#ffc837" />
-            <circle cx="154" cy="78" r="3" fill="#fff" /><circle cx="166" cy="78" r="3" fill="#fff" />
-            <circle cx="154" cy="78" r="1" fill="#000" /><circle cx="166" cy="78" r="1" fill="#000" />
-            <path d="M157 84 Q160 86 163 84" stroke="#fff" strokeWidth="1.5" />
-
-            <circle cx="65" cy="155" r="17" fill="#ff4b4b" />
-            <path d="M52 144 C52 135, 78 135, 78 144 Z" fill="#ffc107" />
-            <rect x="74" y="141" width="10" height="3" fill="#ffc107" />
-            <circle cx="59" cy="153" r="3" fill="#fff" /><circle cx="71" cy="153" r="3" fill="#fff" />
-            <circle cx="59" cy="153" r="1" fill="#000" /><circle cx="71" cy="153" r="1" fill="#000" />
-            <path d="M62 160 Q65 162 68 160" stroke="#fff" strokeWidth="1.5" />
-
-            <circle cx="138" cy="150" r="16" fill="#ff9800" />
-            <circle cx="128" cy="138" r="4" fill="#ff9800" /><circle cx="148" cy="138" r="4" fill="#ff9800" />
-            <circle cx="132" cy="148" r="2.5" fill="#fff" /><circle cx="144" cy="148" r="2.5" fill="#fff" />
-            <circle cx="132" cy="148" r="1" fill="#000" /><circle cx="144" cy="148" r="1" fill="#000" />
-            <path d="M135 154 Q138 156 141 154" stroke="#fff" strokeWidth="1.2" />
-
-            <polygon points="100,20 102,25 107,25 103,28 105,33 100,30 95,33 97,28 93,25 98,25" fill="#ffc107" opacity="0.8" />
-            <polygon points="175,125 176,128 179,128 177,130 178,133 175,131 172,133 173,130 171,128 174,128" fill="#1cb0f6" opacity="0.6" />
-            <polygon points="25,120 26,123 29,123 27,125 28,128 25,126 22,128 23,125 21,123 24,123" fill="#ff4b4b" opacity="0.6" />
-          </svg>
-        </div>
-
-        {/* Supporting Copy */}
-        <div style={{ padding: "0 12px", marginBottom: 32 }}>
-          <h1 style={{
-            fontFamily: "'Playfair Display', serif",
-            fontWeight: 900,
-            fontSize: 22,
-            lineHeight: 1.4,
-            marginBottom: 16,
-            color: "#fff"
-          }}>
-            The free, fun, and effective way to learn German!
-          </h1>
-          <p style={{
-            fontSize: 14,
-            color: "#788290",
-            lineHeight: 1.6
-          }}>
-            O'yinlar, tezkor testlar va to'laqonli nemischa lug'at yordamida til o'rganishni bugun, mutlaqo bepul boshlang!
-          </p>
-        </div>
-
-        {/* Buttons Stack */}
-        <div style={{ display: "flex", flexDirection: "column", gap: 14, width: "100%", padding: "0 8px" }}>
-          <button 
-            onClick={() => setOnboarded(true)}
-            style={{ 
-              background: "#58cc02", 
-              color: "#fff", 
-              border: "none",
-              borderRadius: 16,
-              padding: "16px 24px",
-              fontFamily: "'DM Sans', sans-serif",
-              fontSize: 16,
-              fontWeight: 800,
-              cursor: "pointer",
-              boxShadow: "0 4px 0 #3b9c02",
-              transition: "all 0.15s ease",
-              letterSpacing: 0.5,
-              textTransform: "uppercase"
-            }}
-            onMouseDown={(e) => {
-              e.currentTarget.style.transform = "translateY(2px)";
-              e.currentTarget.style.boxShadow = "0 2px 0 #3b9c02";
-            }}
-            onMouseUp={(e) => {
-              e.currentTarget.style.transform = "none";
-              e.currentTarget.style.boxShadow = "0 4px 0 #3b9c02";
-            }}
-          >
-            GET STARTED
-          </button>
-          
-          <button 
-            onClick={() => setOnboarded(true)}
-            style={{ 
-              background: "transparent", 
-              color: "#1cb0f6", 
-              border: "2px solid #1c2730",
-              borderRadius: 16,
-              padding: "14px 24px",
-              fontFamily: "'DM Sans', sans-serif",
-              fontSize: 15,
-              fontWeight: 800,
-              cursor: "pointer",
-              transition: "all 0.2s ease"
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = "rgba(28, 176, 246, 0.05)";
-              e.currentTarget.style.borderColor = "#1cb0f6";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = "transparent";
-              e.currentTarget.style.borderColor = "#1c2730";
-            }}
-          >
-            I ALREADY HAVE AN ACCOUNT
-          </button>
-        </div>
-      </div>
-    );
+    return <Onboarding onComplete={handleOnboardingComplete} />;
   }
 
   return (
@@ -852,6 +723,7 @@ export default function App() {
             setCompletedLevels={setCompletedLevels}
             playAudio={playAudio}
             showToast={showToast}
+            addMistake={addMistake}
           />
         )}
 
@@ -957,6 +829,7 @@ export default function App() {
             goldCrownTheme={goldCrownTheme}
             navigate={navigate}
             unlockedAchievements={unlockedAchievements}
+            mistakes={mistakes}
           />
         )}
 
@@ -992,6 +865,15 @@ export default function App() {
               quizCount: quizHistory.length, xp, totalGemsEarned, fastestMatch,
               completedLevels: completedLevels.length, vipUnlocked
             }}
+          />
+        )}
+
+        {page === "mistakes" && (
+          <MistakeReview 
+            navigate={navigate}
+            mistakes={mistakes}
+            clearMistakes={clearMistakes}
+            showToast={showToast}
           />
         )}
 

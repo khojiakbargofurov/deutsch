@@ -56,7 +56,8 @@ export default function QuizGame({
   setGems,
   completedLevels,
   setCompletedLevels,
-  playAudio
+  playAudio,
+  addMistake
 }) {
   // Lesson specific states
   const [arrangedWords, setArrangedWords] = useState([]);
@@ -240,6 +241,9 @@ export default function QuizGame({
         setScore(s => s + 1);
       } else {
         triggerHeartLoss();
+        if (addMistake && q.sentence) {
+          addMistake({ de: q.sentence.de, uz: q.sentence.uz });
+        }
       }
     };
 
@@ -303,6 +307,9 @@ export default function QuizGame({
       setScore(s => s + 1);
     } else {
       triggerHeartLoss();
+      if (addMistake && q.sentence) {
+        addMistake({ de: q.sentence.de, uz: q.sentence.uz });
+      }
     }
   };
 
@@ -317,6 +324,9 @@ export default function QuizGame({
       setScore(s => s + 1);
     } else {
       triggerHeartLoss();
+      if (addMistake && q.word) {
+        addMistake(q.word);
+      }
     }
   };
 
@@ -350,6 +360,19 @@ export default function QuizGame({
       }
     } else {
       setMiniWrongId(card.id);
+      if (addMistake && miniSelectedCard) {
+        const deWord = miniSelectedCard.matchWord;
+        let foundWord = null;
+        for (const cat of Object.values(VOCAB)) {
+          const match = cat.find(w => w.de === deWord);
+          if (match) { foundWord = match; break; }
+        }
+        if (foundWord) {
+          addMistake(foundWord);
+        } else {
+          addMistake({ de: deWord, uz: "Kichik moslashtirish xatosi" });
+        }
+      }
       setMiniSelectedCard(null);
       triggerHeartLoss();
 
@@ -439,6 +462,9 @@ export default function QuizGame({
       setScore(s => s + 1);
     } else {
       triggerHeartLoss();
+      if (addMistake && questions[qIdx].word) {
+        addMistake(questions[qIdx].word);
+      }
     }
   };
 
@@ -452,6 +478,9 @@ export default function QuizGame({
       setScore(s => s + 1);
     } else {
       triggerHeartLoss();
+      if (addMistake && questions[qIdx].sentence) {
+        addMistake({ de: questions[qIdx].sentence.de, uz: questions[qIdx].sentence.uz });
+      }
     }
   };
 
