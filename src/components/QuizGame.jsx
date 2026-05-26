@@ -503,7 +503,7 @@ export default function QuizGame({
               <button key={cat}
                 className={`chip ${quizCat === cat ? "chip-act" : ""}`}
                 style={quizCat === cat ? { background: m.accent, borderColor: m.accent, color: "#0d0d0d", fontWeight: 600 } : {}}
-                onClick={() => setQuizCat(cat)}>{m.label} ({VOCAB[cat].length})</button>
+                onClick={() => setQuizCat(cat)}>{m.label} ({VOCAB[cat]?.length || 0})</button>
             ))}
             <button 
               className={`chip ${quizCat === "favorites" ? "chip-act" : ""}`}

@@ -47,7 +47,7 @@ export default function VocabList({
             className={`chip ${vocabCat === cat ? "chip-act" : ""}`}
             style={vocabCat === cat ? { background: m.accent, borderColor: m.accent, color: "#0d0d0d", fontWeight: 600 } : {}}
             onClick={() => { setVocabCat(cat); setFlashIdx(0); setFlipped(false); setVocabSearch(""); }}>
-            {m.label} <span style={{ opacity: .6 }}>({VOCAB[cat].length})</span>
+            {m.label} <span style={{ opacity: .6 }}>({VOCAB[cat]?.length || 0})</span>
           </button>
         ))}
         <button 

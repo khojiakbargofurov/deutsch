@@ -46,7 +46,7 @@ export default function SpellingGame({
               <button key={cat}
                 className={`chip ${spellingCat === cat ? "chip-act" : ""}`}
                 style={spellingCat === cat ? { background: m.accent, borderColor: m.accent, color: "#0d0d0d", fontWeight: 600 } : {}}
-                onClick={() => setSpellingCat(cat)}>{m.label} ({VOCAB[cat].length})</button>
+                onClick={() => setSpellingCat(cat)}>{m.label} ({VOCAB[cat]?.length || 0})</button>
             ))}
             <button 
               className={`chip ${spellingCat === "favorites" ? "chip-act" : ""}`}
