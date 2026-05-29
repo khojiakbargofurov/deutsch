@@ -96,3 +96,22 @@ export function getLeaderboard() {
     .sort((a, b) => b.highScore - a.highScore)
     .slice(0, 10);
 }
+
+// Retrieve an individual user profile by ID
+export function getUser(userId) {
+  const users = getUsers();
+  return users.find(u => String(u.id) === String(userId));
+}
+
+// Update a user's daily word delivery time preference
+export function setUserTime(userId, timeStr) {
+  const users = getUsers();
+  const idx = users.findIndex(u => String(u.id) === String(userId));
+  
+  if (idx !== -1) {
+    users[idx].dailyWordTime = timeStr;
+    saveUsers(users);
+    return users[idx];
+  }
+  return null;
+}

@@ -5,7 +5,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import fs from "fs";
 import { VOCAB, TIPS, DAILY_WORDS } from "./data.js";
-import { addUser, getUsers, updateHighScore, getLeaderboard } from "./usersStore.js";
+import { addUser, getUsers, updateHighScore, getLeaderboard, getUser, setUserTime } from "./usersStore.js";
 
 dotenv.config();
 
@@ -61,8 +61,8 @@ const mainKeyboard = () => {
   return Markup.inlineKeyboard([
     [Markup.button.callback("📚 Lug'at Bo'limi", "menu_vocab"), Markup.button.callback("🧠 Test Boshlash", "menu_quiz")],
     [Markup.button.callback("🎴 Fleshkartalar", "menu_flashcard_setup"), Markup.button.callback("🏆 Top O'quvchilar", "menu_leaderboard")],
-    [Markup.button.callback("📖 Muhim Maslahatlar", "menu_tips")],
-    [Markup.button.webApp("🌐 Deutsch Hub Saytini Ochish", WEB_APP_URL)]
+    [Markup.button.callback("📖 Muhim Maslahatlar", "menu_tips"), Markup.button.callback("⚙️ Sozlamalar", "menu_settings")],
+    [Markup.button.webApp("🌐 Blitzi Saytini Ochish", WEB_APP_URL)]
   ]);
 };
 
@@ -78,7 +78,7 @@ bot.start((ctx) => {
   if (ADMIN_CHAT_ID) {
     if (String(userId) !== String(ADMIN_CHAT_ID)) {
       const adminNotification = 
-        `🔔 *Yangi foydalanuvchi!* (Deutsch Hub Bot)\n\n` +
+        `🔔 *Yangi foydalanuvchi!* (Blitzi Bot)\n\n` +
         `👤 *Ismi:* ${ctx.from.first_name} ${ctx.from.last_name || ""}\n` +
         `🏷️ *Username:* ${username}\n` +
         `🆔 *Telegram ID:* \`${userId}\``;
@@ -98,7 +98,7 @@ bot.start((ctx) => {
 
   const welcomeText = 
     `🇩🇪 *Herzlich willkommen, ${name}!* 🇺🇿\n\n` +
-    `*Deutsch Hub* til o'rganish botiga xush kelibsiz!\n\n` +
+    `*Blitzi* til o'rganish botiga xush kelibsiz!\n\n` +
     `Ushbu bot yordamida siz nemis tili so'z boyligingizni oshirishingiz, interaktiv testlar yordamida bilimingizni sinashingiz va foydali o'rganish maslahatlarini olishingiz mumkin.\n\n` +
     `📌 *Asosiy imkoniyatlar:*\n` +
     `• 📚 *Lug'at bo'limi* — turli toifalardagi yuzlab nemischa so'zlar.\n` +
@@ -333,6 +333,93 @@ bot.action(/^tip_(\d+)$/, (ctx) => {
       [Markup.button.callback("🏠 Bosh menyu", "menu_main")]
     ])
   });
+});
+
+// Settings Menu
+bot.action("menu_settings", (ctx) => {
+  ctx.answerCbQuery();
+  const userId = ctx.from.id;
+  
+  // Make sure user exists
+  addUser(ctx.from);
+  const user = getUser(userId) || { dailyWordTime: "09:00" };
+  const currentTime = user.dailyWordTime || "09:00";
+
+  const text = 
+    `⚙️ *Sozlamalar bo'limi*\n\n` +
+    `📅 *Kunlik 5 ta so'z yuborish vaqti:* *${currentTime}*\n` +
+    `_(Har kuni Toshkent vaqti bilan ushbu soatda yangi so'zlar yuboriladi.)_\n\n` +
+    `O'zingizga qulay vaqtni belgilash uchun quyidagi tugmalardan birini bosing:`;
+
+  const timeOptions = [
+    [
+      Markup.button.callback("🌅 07:00", "set_time_07:00"),
+      Markup.button.callback("🌅 08:00", "set_time_08:00"),
+      Markup.button.callback("☀️ 09:00", "set_time_09:00"),
+      Markup.button.callback("☀️ 10:00", "set_time_10:00")
+    ],
+    [
+      Markup.button.callback("🕛 12:00", "set_time_12:00"),
+      Markup.button.callback("🌤 14:00", "set_time_14:00"),
+      Markup.button.callback("🌤 16:00", "set_time_16:00"),
+      Markup.button.callback("🌆 18:00", "set_time_18:00")
+    ],
+    [
+      Markup.button.callback("🌃 19:00", "set_time_19:00"),
+      Markup.button.callback("🌃 20:00", "set_time_20:00"),
+      Markup.button.callback("🌌 21:00", "set_time_21:00"),
+      Markup.button.callback("🌌 22:00", "set_time_22:00")
+    ],
+    [Markup.button.callback("⬅️ Bosh menyuga qaytish", "menu_main")]
+  ];
+
+  ctx.editMessageText(text, {
+    parse_mode: "Markdown",
+    ...Markup.inlineKeyboard(timeOptions)
+  });
+});
+
+// Update Preferred Time Callback
+bot.action(/^set_time_(.+)$/, async (ctx) => {
+  const timeStr = ctx.match[1];
+  const userId = ctx.from.id;
+  
+  setUserTime(userId, timeStr);
+  ctx.answerCbQuery(`✅ Vaqt o'rnatildi: ${timeStr}`);
+  
+  const text = 
+    `⚙️ *Sozlamalar bo'limi*\n\n` +
+    `✅ *Vaqt muvaffaqiyatli yangilandi!*\n` +
+    `📅 *Kunlik 5 ta so'z yuborish vaqti:* *${timeStr}*\n` +
+    `_(Har kuni Toshkent vaqti bilan ushbu soatda yangi so'zlar yuboriladi.)_\n\n` +
+    `Boshqa vaqtni belgilash uchun quyidagi tugmalardan birini bosing:`;
+
+  const timeOptions = [
+    [
+      Markup.button.callback("🌅 07:00", "set_time_07:00"),
+      Markup.button.callback("🌅 08:00", "set_time_08:00"),
+      Markup.button.callback("☀️ 09:00", "set_time_09:00"),
+      Markup.button.callback("☀️ 10:00", "set_time_10:00")
+    ],
+    [
+      Markup.button.callback("🕛 12:00", "set_time_12:00"),
+      Markup.button.callback("🌤 14:00", "set_time_14:00"),
+      Markup.button.callback("🌤 16:00", "set_time_16:00"),
+      Markup.button.callback("🌆 18:00", "set_time_18:00")
+    ],
+    [
+      Markup.button.callback("🌃 19:00", "set_time_19:00"),
+      Markup.button.callback("🌃 20:00", "set_time_20:00"),
+      Markup.button.callback("🌌 21:00", "set_time_21:00"),
+      Markup.button.callback("🌌 22:00", "set_time_22:00")
+    ],
+    [Markup.button.callback("⬅️ Bosh menyuga qaytish", "menu_main")]
+  ];
+
+  ctx.editMessageText(text, {
+    parse_mode: "Markdown",
+    ...Markup.inlineKeyboard(timeOptions)
+  }).catch(() => {});
 });
 
 // VOCAB section
@@ -880,24 +967,68 @@ async function sendDailyWord(botInstance) {
   }
 }
 
-// Word of the Day scheduler loop (checks every 15 minutes)
+// Word of the Day scheduler loop (checks every 10 minutes)
 setInterval(async () => {
-  const now = new Date();
-  const uzTime = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Tashkent" }));
-  const uzHours = uzTime.getHours();
-  const uzDateStr = uzTime.toISOString().slice(0, 10);
+  try {
+    const now = new Date();
+    const uzTime = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Tashkent" }));
+    const uzHours = uzTime.getHours();
+    const uzDateStr = uzTime.toISOString().slice(0, 10);
+    
+    // Format current Tashkent hour as "HH:00" for comparison (e.g. "09:00")
+    const hourStr = String(uzHours).padStart(2, "0") + ":00";
 
-  // Check if it's 9:00 AM (or between 9:00 and 10:00 AM) in Tashkent
-  if (uzHours === 9) {
-    const status = getDailyStatus();
-    if (status.lastSentDate !== uzDateStr) {
-      status.lastSentDate = uzDateStr;
-      saveDailyStatus(status);
-      console.log(`⏰ Avtomatik kunlik so'z yuborish boshlandi (Sana: ${uzDateStr})...`);
-      await sendDailyWord(bot);
+    const users = getUsers();
+    let sentCount = 0;
+
+    // Select 5 words based on current day of the year
+    const dayOfYear = Math.floor((uzTime - new Date(uzTime.getFullYear(), 0, 0)) / 86400000);
+    const selectedWords = [];
+    for (let i = 0; i < 5; i++) {
+      const wordIdx = (dayOfYear * 5 + i) % DAILY_WORDS.length;
+      selectedWords.push(DAILY_WORDS[wordIdx]);
     }
+
+    let message = `🌟 *KUNLIK 5 TA YANGI SO'Z* 🌟\n\n`;
+    for (let i = 0; i < 5; i++) {
+      const w = selectedWords[i];
+      message += 
+        `*${i + 1}.* 🇩🇪 \`${w.de}\` — 🇺🇿 *${w.uz}*\n` +
+        `📝 _${w.exampleDe}_\n` +
+        `👉 _${w.exampleUz}_\n\n`;
+    }
+    message += `📚 *Blitzi* orqali bilimingizni boyitishda davom eting!`;
+
+    let userStoreUpdated = false;
+
+    for (const u of users) {
+      const preferredTime = u.dailyWordTime || "09:00"; // default to 09:00 AM
+      
+      if (preferredTime === hourStr) {
+        if (u.lastDailySentDate !== uzDateStr) {
+          u.lastDailySentDate = uzDateStr;
+          userStoreUpdated = true;
+          
+          try {
+            await bot.telegram.sendMessage(u.id, message, { parse_mode: "Markdown" });
+            sentCount++;
+          } catch (err) {
+            console.error(`⚠️ User ${u.id} ga kunlik so'zlar yuborilmadi:`, err.message);
+          }
+          // Slight delay to satisfy Telegram rate limits
+          await new Promise(resolve => setTimeout(resolve, 50));
+        }
+      }
+    }
+
+    if (userStoreUpdated) {
+      saveUsers(users);
+      console.log(`⏰ [Scheduler] Tashkent vaqti: ${hourStr}. ${sentCount} ta foydalanuvchiga kunlik so'zlar yuborildi.`);
+    }
+  } catch (err) {
+    console.error("❌ Scheduler ishga tushishida xato:", err);
   }
-}, 15 * 60 * 1000);
+}, 10 * 60 * 1000);
 
 // ── TELEGRAM INLINE QUERY MODE ──
 
