@@ -231,14 +231,15 @@ bot.action("admin_daily_word", async (ctx) => {
   if (String(userId) !== String(ADMIN_CHAT_ID)) return ctx.answerCbQuery("Taqqiqlangan!");
   
   ctx.answerCbQuery("Yuborilmoqda...");
-  ctx.editMessageText("⏳ *Kunlik so'z barcha foydalanuvchilarga yuborilmoqda...*", { parse_mode: "Markdown" });
+  ctx.editMessageText("⏳ *Kunlik 5 ta so'z barcha foydalanuvchilarga yuborilmoqda...*", { parse_mode: "Markdown" });
   
   const result = await sendDailyWord(bot);
   
   if (result) {
+    const wordsList = result.words.map(w => `• *${w.de}* — *${w.uz}*`).join("\n");
     ctx.replyWithMarkdown(
-      `✅ *Kunlik so'z muvaffaqiyatli yuborildi!*\n\n` +
-      `• So'z: *${result.word.de}* — *${result.word.uz}*\n` +
+      `✅ *Kunlik 5 ta so'z muvaffaqiyatli yuborildi!*\n\n` +
+      `${wordsList}\n\n` +
       `• Yetkazildi: *${result.success} ta*`,
       Markup.inlineKeyboard([[Markup.button.callback("⚙️ Admin paneliga qaytish", "admin_main")]])
     );
@@ -837,22 +838,26 @@ function saveDailyStatus(status) {
   }
 }
 
-// Helper: Send Daily Word Broadcast
+// Helper: Send Daily Word Broadcast (5 words)
 async function sendDailyWord(botInstance) {
   try {
-    // Select word based on current day of the year
+    // Select 5 words based on current day of the year
     const dayOfYear = Math.floor((new Date() - new Date(new Date().getFullYear(), 0, 0)) / 86400000);
-    const wordIdx = dayOfYear % DAILY_WORDS.length;
-    const word = DAILY_WORDS[wordIdx];
+    const selectedWords = [];
+    for (let i = 0; i < 5; i++) {
+      const wordIdx = (dayOfYear * 5 + i) % DAILY_WORDS.length;
+      selectedWords.push(DAILY_WORDS[wordIdx]);
+    }
 
-    const message = 
-      `🌟 *KUNLIK YANGI SO'Z* 🌟\n\n` +
-      `🇩🇪 *Nemischa:* \`${word.de}\`\n` +
-      `🇺🇿 *O'zbekcha:* *${word.uz}*\n\n` +
-      `📝 *Gapda ishlatilishi:*\n` +
-      `• _${word.exampleDe}_\n` +
-      `👉 _${word.exampleUz}_\n\n` +
-      `📚 Lug'at orqali bilimingizni boyitishda davom eting!`;
+    let message = `🌟 *KUNLIK 5 TA YANGI SO'Z* 🌟\n\n`;
+    for (let i = 0; i < 5; i++) {
+      const w = selectedWords[i];
+      message += 
+        `*${i + 1}.* 🇩🇪 \`${w.de}\` — 🇺🇿 *${w.uz}*\n` +
+        `📝 _${w.exampleDe}_\n` +
+        `👉 _${w.exampleUz}_\n\n`;
+    }
+    message += `📚 *Blitzi* orqali bilimingizni boyitishda davom eting!`;
 
     const users = getUsers();
     let success = 0;
@@ -862,13 +867,13 @@ async function sendDailyWord(botInstance) {
         await botInstance.telegram.sendMessage(u.id, message, { parse_mode: "Markdown" });
         success++;
       } catch (err) {
-        console.error(`⚠️ User ${u.id} ga kunlik so'z yuborilmadi:`, err.message);
+        console.error(`⚠️ User ${u.id} ga kunlik so'zlar yuborilmadi:`, err.message);
       }
       await new Promise(resolve => setTimeout(resolve, 50));
     }
     
-    console.log(`📢 Kunlik so'z ${users.length} ta foydalanuvchidan ${success} tasiga yuborildi.`);
-    return { success, word };
+    console.log(`📢 Kunlik so'zlar ${users.length} ta foydalanuvchidan ${success} tasiga yuborildi.`);
+    return { success, word: selectedWords[0], words: selectedWords };
   } catch (err) {
     console.error("❌ Kunlik so'z yuborishda xato:", err);
     return null;

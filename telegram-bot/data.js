@@ -413,3 +413,36 @@ export const LEVELS = [
     sentence: { de: "Wir gewinnen sofort das Spiel", uz: "Biz darhol o'yinni yutamiz" }
   }
 ];
+
+export const DAILY_WORDS = [
+  { de: "lernen", uz: "o'rganmoq", exampleDe: "Ich lerne jeden Tag Deutsch mit Blitzi.", exampleUz: "Men har kuni Blitzi yordamida nemis tilini o'rganaman." },
+  { de: "sprechen", uz: "gapirmoq", exampleDe: "Er spricht fließend und selbstbewusst Deutsch.", exampleUz: "U nemis tilida ravon va ishonch bilan gapiradi." },
+  { de: "der Erfolg", uz: "muvaffaqiyat", exampleDe: "Fleiß ist der Schlüssel zum Erfolg beim Sprachenlernen.", exampleUz: "G'ayrat (mehnatsevarlik) — til o'rganishda muvaffaqiyat kalitidir." },
+  { de: "verstehen", uz: "tushunmoq", exampleDe: "Mit etwas Übung kann ich deutsche Podcasts gut verstehen.", exampleUz: "Biroz mashq bilan nemischa podkastlarni yaxshi tushuna olaman." },
+  { de: "versuchen", uz: "urinib ko'rmoq / harakat qilmoq", exampleDe: "Versuche immer, auf Deutsch zu denken.", exampleUz: "Doimo nemis tilida o'ylashga harakat qiling." },
+  { de: "die Geduld", uz: "sabr-toqat", exampleDe: "Sprachenlernen braucht Zeit und viel Geduld.", exampleUz: "Til o'rganish vaqt va ko'p sabr-toqat talab qiladi." },
+  { de: "verbessern", uz: "yaxshilamoq / rivojlantirmoq", exampleDe: "Ich möchte meinen deutschen Wortschatz verbessern.", exampleUz: "Men nemischa so'z boyligimni yaxshilamoqchiman." },
+  { de: "die Gewohnheit", uz: "odat", exampleDe: "Tägliches Lernen ist eine großartige Gewohnheit.", exampleUz: "Har kuni o'rganish — ajoyib odatdir." },
+  { de: "glauben", uz: "ishonmoq", exampleDe: "Glaube an dich selbst und deine Fähigkeiten!", exampleUz: "O'zingizga va qobiliyatingizga ishoning!" },
+  { de: "erreichen", uz: "erishmoq", exampleDe: "Ich werde mein Ziel erreichen, fließend Deutsch zu sprechen.", exampleUz: "Nemis tilida ravon gapirish maqsadimga erishaman." },
+  { de: "arbeiten", uz: "ishlamoq", exampleDe: "Ich arbeite als Entwickler in Deutschland.", exampleUz: "Men Germaniyada dasturchi bo'lib ishlayman." },
+  { de: "reisen", uz: "sayohat qilmoq", exampleDe: "Ich reise sehr gerne in neue Städte.", exampleUz: "Men yangi shaharlarga sayohat qilishni juda yaxshi ko'raman." },
+  { de: "die Gesundheit", uz: "sog'lik", exampleDe: "Gesundheit ist der größte Reichtum.", exampleUz: "Sog'lik — eng katta boylikdir." },
+  { de: "der Traum", uz: "orzu / tush", exampleDe: "Folge deinen Träumen und gib niemals auf.", exampleUz: "Orzularingizga ergashing va hech qachon taslim bo'lmang." },
+  { de: "wichtig", uz: "muhim", exampleDe: "Es ist wichtig, regelmäßig Vokabeln zu wiederholen.", exampleUz: "Doimiy ravishda so'zlarni takrorlab turish muhimdir." },
+  { de: "die Zeit", uz: "vaqt", exampleDe: "Die Zeit vergeht wie im Flug.", exampleUz: "Vaqt xuddi uchgandek o'tib ketadi." },
+  { de: "helfen", uz: "yordam bermoq", exampleDe: "Kann ich Ihnen bei der Übersetzung helfen?", exampleUz: "Sizga tarjimada yordam bera olamanmi?" },
+  { de: "freundlich", uz: "do'stona / xushmuomala", exampleDe: "Die Menschen hier sind sehr freundlich.", exampleUz: "Bu yerdagi odamlar juda xushmuomala." },
+  { de: "das Wissen", uz: "bilim", exampleDe: "Wissen ist Macht.", exampleUz: "Bilim — kuchdir." },
+  { de: "glücklich", uz: "baxtli", exampleDe: "Ich bin so glücklich, Deutsch gelernt zu haben.", exampleUz: "Nemis tilini o'rganganimdan juda baxtliman." },
+  { de: "entscheiden", uz: "qaror qilmoq", exampleDe: "Du musst dich schnell entscheiden.", exampleUz: "Sen tezda qaror qabul qilishing kerak." },
+  { de: "empfehlen", uz: "tavsiya qilmoq", exampleDe: "Welches deutsche Buch können Sie mir empfehlen?", exampleUz: "Menga qaysi nemischa kitobni tavsiya qila olasiz?" },
+  { de: "erklären", uz: "tushuntirmoq", exampleDe: "Der Lehrer kann die Grammatik sehr gut erklären.", exampleUz: "O'qituvchi grammatikani juda yaxshi tushuntira oladi." },
+  { de: "gemeinsam", uz: "birgalikda", exampleDe: "Gemeinsam können wir diese Aufgabe lösen.", exampleUz: "Birgalikda biz bu vazifani yecha olamiz." },
+  { de: "die Zukunft", uz: "kelajak", exampleDe: "Niemand weiß, was in der Zukunft passiert.", exampleUz: "Kelajakda nima bo'lishini hech kim bilmaydi." },
+  { de: "günstig", uz: "arzon / qulay / hamyonbop", exampleDe: "Dieses Angebot ist sehr günstig.", exampleUz: "Bu taklif juda hamyonbop." },
+  { de: "die Möglichkeit", uz: "imkoniyat", exampleDe: "Deutschland bietet viele Möglichkeiten für Studenten.", exampleUz: "Germaniya talabalar uchun ko'plab imkoniyatlarni taklif etadi." },
+  { de: "vergessen", uz: "unutmoq", exampleDe: "Vergiss nicht, die Hausaufgaben zu machen.", exampleUz: "Uy vazifasini qilishni unutma." },
+  { de: "erinnern", uz: "eslamoq / eslatmoq", exampleDe: "Ich erinnere mich gerne an meine Reise nach Berlin.", exampleUz: "Berlinga qilgan sayohatimni mamnuniyat bilan eslayman." },
+  { de: "schaffen", uz: "uddalamoq / yaratmoq", exampleDe: "Mach dir keine Sorgen, du wirst es schaffen!", exampleUz: "Xavotir olma, sen buni uddalaysan!" }
+];
