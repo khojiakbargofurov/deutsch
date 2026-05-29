@@ -20,9 +20,9 @@ if (!TOKEN || TOKEN === "YOUR_TELEGRAM_BOT_TOKEN_HERE") {
 const bot = new Telegraf(TOKEN || "MOCK_TOKEN");
 
 // Register users on every update dynamically
-bot.use((ctx, next) => {
+bot.use(async (ctx, next) => {
   if (ctx.from) {
-    addUser(ctx.from);
+    await addUser(ctx.from).catch(err => console.error("Error in addUser middleware:", err));
   }
   return next();
 });
@@ -150,12 +150,12 @@ bot.command("admin", (ctx) => {
 });
 
 // Admin stats
-bot.action("admin_stats", (ctx) => {
+bot.action("admin_stats", async (ctx) => {
   const userId = ctx.from.id;
   if (String(userId) !== String(ADMIN_CHAT_ID)) return ctx.answerCbQuery("Taqqiqlangan!");
   
   ctx.answerCbQuery();
-  const users = getUsers();
+  const users = await getUsers();
   
   ctx.editMessageText(
     `📊 *Bot statistikasi:*\n\n` +
@@ -166,12 +166,12 @@ bot.action("admin_stats", (ctx) => {
 });
 
 // Admin users list
-bot.action("admin_users", (ctx) => {
+bot.action("admin_users", async (ctx) => {
   const userId = ctx.from.id;
   if (String(userId) !== String(ADMIN_CHAT_ID)) return ctx.answerCbQuery("Taqqiqlangan!");
   
   ctx.answerCbQuery();
-  const users = getUsers();
+  const users = await getUsers();
   
   if (users.length === 0) {
     return ctx.editMessageText("👥 Foydalanuvchilar hali mavjud emas.", {
@@ -336,13 +336,13 @@ bot.action(/^tip_(\d+)$/, (ctx) => {
 });
 
 // Settings Menu
-bot.action("menu_settings", (ctx) => {
+bot.action("menu_settings", async (ctx) => {
   ctx.answerCbQuery();
   const userId = ctx.from.id;
   
   // Make sure user exists
-  addUser(ctx.from);
-  const user = getUser(userId) || { dailyWordTime: "09:00" };
+  await addUser(ctx.from);
+  const user = await getUser(userId) || { dailyWordTime: "09:00" };
   const currentTime = user.dailyWordTime || "09:00";
 
   const text = 
@@ -384,7 +384,7 @@ bot.action(/^set_time_(.+)$/, async (ctx) => {
   const timeStr = ctx.match[1];
   const userId = ctx.from.id;
   
-  setUserTime(userId, timeStr);
+  await setUserTime(userId, timeStr);
   ctx.answerCbQuery(`✅ Vaqt o'rnatildi: ${timeStr}`);
   
   const text = 
@@ -523,7 +523,7 @@ function sendQuizQuestion(ctx, chatId) {
 }
 
 // Handle Quiz Answer click
-bot.action(/^quiz_ans_(correct|wrong)_(\d+)$/, (ctx) => {
+bot.action(/^quiz_ans_(correct|wrong)_(\d+)$/, async (ctx) => {
   const isCorrect = ctx.match[1] === "correct";
   const chatId = ctx.chat.id;
   const session = sessions.get(chatId);
@@ -555,7 +555,7 @@ bot.action(/^quiz_ans_(correct|wrong)_(\d+)$/, (ctx) => {
     const total = questions.length;
 
     // Update high score in DB
-    const { updated, oldHighScore } = updateHighScore(ctx.from.id, finalScore);
+    const { updated, oldHighScore } = await updateHighScore(ctx.from.id, finalScore);
 
     let emoji = "🎖";
     if (finalScore >= 9) emoji = "🏆 Ajoyib natija!";
@@ -800,7 +800,7 @@ bot.on("text", async (ctx) => {
     }
 
     adminStates.delete(userId);
-    const users = getUsers();
+    const users = await getUsers();
     
     if (users.length === 0) {
       return ctx.reply("👥 Yuborish uchun birorta ham foydalanuvchi topilmadi.");
@@ -946,7 +946,7 @@ async function sendDailyWord(botInstance) {
     }
     message += `📚 *Blitzi* orqali bilimingizni boyitishda davom eting!`;
 
-    const users = getUsers();
+    const users = await getUsers();
     let success = 0;
     
     for (const u of users) {
@@ -978,7 +978,7 @@ setInterval(async () => {
     // Format current Tashkent hour as "HH:00" for comparison (e.g. "09:00")
     const hourStr = String(uzHours).padStart(2, "0") + ":00";
 
-    const users = getUsers();
+    const users = await getUsers();
     let sentCount = 0;
 
     // Select 5 words based on current day of the year

@@ -35,7 +35,7 @@ const keyboard = Markup.inlineKeyboard([
 
 async function runBroadcast() {
   try {
-    const users = getUsers();
+    const users = await getUsers();
     console.log(`📢 ${users.length} ta foydalanuvchiga yangi imkoniyatlar xabarnomasi yuborilmoqda...`);
     
     let successCount = 0;
